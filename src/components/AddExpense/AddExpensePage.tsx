@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { calculateParticipantSplit, useAddExpenseStore } from '~/store/addStore';
 import { api } from '~/utils/api';
 import { UserInput } from './UserInput';
@@ -19,6 +19,8 @@ import { CategoryIcons } from '../ui/categoryIcons';
 import Link from 'next/link';
 import { CURRENCIES } from '~/lib/currency';
 import { GoCardlessTransactions } from './GoCardlessTransactions';
+import '../../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 const categories = {
   entertainment: {
@@ -132,6 +134,8 @@ export const AddExpensePage: React.FC<{
   const category = useAddExpenseStore((s) => s.category);
   const description = useAddExpenseStore((s) => s.description);
   const isFileUploading = useAddExpenseStore((s) => s.isFileUploading);
+
+  const { t, ready } = useTranslation();
 
   const { setCurrency, setCategory, setDescription, setAmount, resetState } = useAddExpenseStore(
     (s) => s.actions,
@@ -303,15 +307,15 @@ export const AddExpensePage: React.FC<{
           {participants.length === 1 ? (
             <Link href="/balances">
               <Button onClick={resetAll} variant="ghost" className=" px-0 text-primary">
-                Cancel
+                {t('cancel')}
               </Button>
             </Link>
           ) : (
             <Button variant="ghost" className=" px-0 text-primary" onClick={resetState}>
-              Cancel
+              {t('cancel')}
             </Button>
           )}
-          <div className="text-center">Add new expense</div>
+          <div className="text-center">{t('add_expense')}</div>
           <Button
             variant="ghost"
             className=" px-0 text-primary"
@@ -324,7 +328,7 @@ export const AddExpensePage: React.FC<{
             }
             onClick={addExpense}
           >
-            Save
+            {t('save')}
           </Button>{' '}
         </div>
         <UserInput />
@@ -339,7 +343,7 @@ export const AddExpensePage: React.FC<{
                     <CategoryIcon size={20} />
                   </div>
                 }
-                title="Categories"
+                title={t('expense_categories')}
                 className="h-[70vh]"
                 shouldCloseOnAction
               >
@@ -378,7 +382,7 @@ export const AddExpensePage: React.FC<{
                 </div>
               </AppDrawer>
               <Input
-                placeholder="Enter description"
+                placeholder={t('expense_description_placeholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value.toString() ?? '')}
                 className="text-lg placeholder:text-sm"
@@ -392,7 +396,7 @@ export const AddExpensePage: React.FC<{
                   </div>
                 }
                 onTriggerClick={() => setOpen(true)}
-                title="Select currency"
+                title={t('expense_select_currency')}
                 className="h-[70vh]"
                 shouldCloseOnAction
                 open={open}
@@ -402,8 +406,8 @@ export const AddExpensePage: React.FC<{
               >
                 <div className="">
                   <Command className="h-[50vh]">
-                    <CommandInput className="text-lg" placeholder="Search currency" />
-                    <CommandEmpty>No currency found.</CommandEmpty>
+                    <CommandInput className="text-lg" placeholder={t('expense_currency_search')} />
+                    <CommandEmpty>{t('expense_currency_notfound')}.</CommandEmpty>
                     <CommandGroup className="h-full overflow-auto">
                       {CURRENCIES.map((framework) => (
                         <CommandItem
@@ -439,7 +443,7 @@ export const AddExpensePage: React.FC<{
               </AppDrawer>
 
               <Input
-                placeholder="Enter amount"
+                placeholder={t('expense_amount_placeholder')}
                 className="text-lg placeholder:text-sm"
                 type="text"
                 inputMode="decimal"
@@ -467,12 +471,13 @@ export const AddExpensePage: React.FC<{
                           <CalendarIcon className="mr-2 h-6 w-6 text-cyan-500" />
                           {date ? (
                             format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? (
-                              'Today'
+                              t('today')
                             ) : (
-                              format(date, 'MMM dd')
+                              //format(date, 'MMM dd')
+                              t('local_date', { value: new Date(date) })
                             )
                           ) : (
-                            <span>Pick a date</span>
+                            <span>{t('expense_date')}</span>
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -501,7 +506,7 @@ export const AddExpensePage: React.FC<{
                       }
                       onClick={() => addExpense()}
                     >
-                      Submit
+                      {t('submit')}
                     </Button>
                   </div>
                 </div>

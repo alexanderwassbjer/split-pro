@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import MainLayout from '~/components/Layout/MainLayout';
+import React, { useEffect } from 'react';
 import Avatar from 'boring-avatars';
 import clsx from 'clsx';
 import { Button } from '~/components/ui/button';
@@ -41,6 +42,8 @@ import {
 } from '~/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import GroupMyBalance from '~/components/group/GroupMyBalance';
+import '../../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 const BalancePage: NextPageWithUser<{
   enableSendingInvites: boolean;
@@ -58,6 +61,13 @@ const BalancePage: NextPageWithUser<{
   const [showDeleteTrigger, setShowDeleteTrigger] = useState(false);
   const [showLeaveTrigger, setShowLeaveTrigger] = useState(false);
 
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
+
   async function inviteMembers() {
     if (!groupDetailQuery.data) return;
     const inviteLink =
@@ -66,8 +76,8 @@ const BalancePage: NextPageWithUser<{
     if (navigator.share) {
       navigator
         .share({
-          title: `Join to ${groupDetailQuery.data.name} in Splitpro`,
-          text: 'Join to the group and you can add, manage expenses, and track your balances',
+          title: t('group_share_text', { groupname: groupDetailQuery.data.name }),
+          text: t('group_share_text'),
           url: inviteLink,
         })
         .then(() => console.log('Successful share'))
@@ -124,7 +134,7 @@ const BalancePage: NextPageWithUser<{
   return (
     <>
       <Head>
-        <title>Group outstanding balances</title>
+        <title>{t('outstanding_balances')}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <MainLayout
@@ -145,7 +155,7 @@ const BalancePage: NextPageWithUser<{
         actions={
           <div className="flex gap-2">
             <AppDrawer
-              title="Group statistics"
+              title={t('group_info')}
               trigger={<BarChartHorizontal className="h-6 w-6" />}
               className="h-[85vh]"
             >
@@ -319,7 +329,7 @@ const BalancePage: NextPageWithUser<{
             <div className=" mb-4 flex justify-center gap-2 overflow-y-auto border-b px-2 pb-4">
               <Link href={`/add?groupId=${groupId}`}>
                 <Button size="sm" className="gap-1 text-sm lg:w-[180px]">
-                  Add Expense
+                {t('add_expense')}
                 </Button>
               </Link>
               <Button size="sm" className="gap-1 text-sm" variant="secondary">
@@ -328,7 +338,7 @@ const BalancePage: NextPageWithUser<{
                     group={groupDetailQuery.data}
                     enableSendingInvites={enableSendingInvites}
                   >
-                    <UserPlus className="h-4 w-4 text-gray-400" /> Add members
+                    <UserPlus className="h-4 w-4 text-gray-400" /> {t('addmembers')}
                   </AddMembers>
                 ) : null}
               </Button>
@@ -340,11 +350,11 @@ const BalancePage: NextPageWithUser<{
               >
                 {isInviteCopied ? (
                   <>
-                    <Check className="h-4 w-4 text-gray-400" /> Copied
+                    <Check className="h-4 w-4 text-gray-400" /> {t('copied')}
                   </>
                 ) : (
                   <>
-                    <Share className="h-4 w-4 text-gray-400" /> Invite
+                    <Share className="h-4 w-4 text-gray-400" /> {t('invite')}
                   </>
                 )}
               </Button>
@@ -388,8 +398,9 @@ const BalancePage: NextPageWithUser<{
                     className={`flex text-center ${isSettlement ? 'text-sm text-gray-400' : 'text-xs text-gray-500'}`}
                   >
                     <span className="text-[10px]">{isSettlement ? '  🎉  ' : null}</span>
-                    {youPaid ? 'You' : e.paidByUser.name ?? e.paidByUser.email} paid {e.currency}{' '}
-                    {toUIString(e.amount)}{' '}
+                    {youPaid ? t('you') : e.paidByUser.name ?? e.paidByUser.email}{' '}
+                    {isSettlement ? (youPaid ? t('you_settled') : t('settled')) : (youPaid ? t('you_paid') : t('paid'))} 
+                    {' '}{e.currency}{' '}{toUIString(e.amount)}{' '}
                   </p>
                 </div>
               </div>
@@ -398,7 +409,7 @@ const BalancePage: NextPageWithUser<{
                   <div
                     className={`text-right text-xs ${youPaid ? 'text-emerald-500' : 'text-orange-600'}`}
                   >
-                    {youPaid ? 'You lent' : 'You owe'}
+                    {youPaid ? t('you_lent') : t('you_owe')}
                   </div>
                   <div className={`text-right ${youPaid ? 'text-emerald-500' : 'text-orange-600'}`}>
                     <span className="font-light ">{e.currency}</span>{' '}

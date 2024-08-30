@@ -8,6 +8,8 @@ import { isStorageConfigured } from '~/server/storage';
 import { useAddExpenseStore } from '~/store/addStore';
 import { type NextPageWithUser } from '~/types';
 import { api } from '~/utils/api';
+import '../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 // 🧾
 
@@ -19,6 +21,13 @@ const AddPage: NextPageWithUser<{
     (s) => s.actions,
   );
   const currentUser = useAddExpenseStore((s) => s.currentUser);
+
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
 
   useEffect(() => {
     setCurrentUser({
@@ -74,7 +83,7 @@ const AddPage: NextPageWithUser<{
   return (
     <>
       <Head>
-        <title>Add Expense</title>
+        <title>{t('add_expense')}</title>
       </Head>
       <MainLayout hideAppBar>
         {currentUser ? (

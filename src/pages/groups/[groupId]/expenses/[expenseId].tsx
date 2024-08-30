@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import MainLayout from '~/components/Layout/MainLayout';
+import React, { useEffect } from 'react';
 import { getServerAuthSessionForSSG } from '~/server/auth';
 import { type User } from '@prisma/client';
 import { api } from '~/utils/api';
@@ -10,6 +11,8 @@ import ExpenseDetails from '~/components/Expense/ExpensePage';
 import { DeleteExpense } from '~/components/Expense/DeleteExpense';
 import { type NextPageWithUser } from '~/types';
 import { env } from 'process';
+import '../../../../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 const ExpensesPage: NextPageWithUser<{ storagePublicUrl?: string }> = ({
   user,
@@ -20,11 +23,16 @@ const ExpensesPage: NextPageWithUser<{ storagePublicUrl?: string }> = ({
   const groupId = parseInt(router.query.groupId as string);
 
   const expenseQuery = api.group.getExpenseDetails.useQuery({ expenseId, groupId });
+  const { t, ready } = useTranslation();
 
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
   return (
     <>
       <Head>
-        <title>Outstanding balances</title>
+        <title>{t('outstanding_balances')}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <MainLayout
@@ -33,7 +41,7 @@ const ExpensesPage: NextPageWithUser<{ storagePublicUrl?: string }> = ({
             <Link href={`/groups/${groupId}`}>
               <ChevronLeftIcon className="mr-1 h-6 w-6" />
             </Link>
-            <p className=" w-full text-center text-[16px] font-normal">Expense details</p>
+            <p className=" w-full text-center text-[16px] font-normal">{t('expense_details')}</p>
             <div></div>
           </div>
         }
