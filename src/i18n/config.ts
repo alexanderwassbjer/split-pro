@@ -5,23 +5,22 @@ import { initReactI18next } from 'react-i18next';
 
 export const supportedLngs = {
   en: "English",
+  sv: "Swedish",
 };
-
 
 i18next
   .use(HttpApi)
-  .use(LanguageDetector) // Use the language detector
-  .use(initReactI18next) // Pass the i18n instance to react-i18next
+  .use(LanguageDetector)
+  .use(initReactI18next)
   .init({
     supportedLngs: Object.keys(supportedLngs),
-    fallbackLng: 'en', // Fallback language if the detector fails
-    //detection: {
-      // Options for language detection
-    //  order: ['querystring', 'cookie', 'localStorage', 'navigator', 'htmlTag'],
-    //  caches: ['cookie'],
-    //},
+    fallbackLng: 'en',
+    detection: {
+      order: ['querystring', 'cookie', 'localStorage', 'navigator', 'htmlTag'],
+      caches: ['cookie'],
+    },
     interpolation: {
-      escapeValue: false, // React already escapes values
+      escapeValue: false,
     },
   });
 

@@ -29,6 +29,7 @@ const ExpensesPage: NextPageWithUser<{ storagePublicUrl?: string }> = ({
   useEffect(() => {
     if (!ready) return; // Don't render the component until i18n is ready
   }, [ready]);
+
   return (
     <>
       <Head>

@@ -50,17 +50,17 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
             </p>
             {!isSameDay(expense.expenseDate, expense.createdAt) ? (
               <p className="text-sm text-gray-500">
-                {t('local_date', { value: expense.expenseDate })}</p>
+                {format(expense.expenseDate, 'dd MMM yyyy')}</p>
             ) : null}
             {expense.deletedByUser ? (
               <p className=" text-sm text-orange-600">
                 {t('expense_deleted_by')} {expense.deletedByUser.name ?? expense.addedByUser.email} {t('on')}{' '}
-                {t('local_date', {value: expense.deletedAt } ?? {date: expense.createdAt })}
+                {format(expense.deletedAt ?? expense.createdAt, 'dd MMM yyyy')}
               </p>
             ) : (
               <p className=" text-sm text-gray-500">
                 {t('expense_added_by')} {expense.addedByUser.name ?? expense.addedByUser.email} {t('on')}{' '}
-                {t('local_date', {value: expense.createdAt })}
+                {format(expense.createdAt, 'dd MMM yyyy')}
               </p>
             )}
           </div>

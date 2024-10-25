@@ -5,6 +5,9 @@ import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { type TransactionAddInputModel } from './AddExpensePage';
 import { env } from '~/env';
+import '../../i18n/config';
+import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import { type SingleTransactionType } from '~/server/api/routers/gocardless';
 
 type Props = {
@@ -36,6 +39,13 @@ export const GoCardlessTransactions = ({
 
   const expensesQuery = api.user.getOwnExpenses.useQuery();
 
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
+
   const returnTransactionsArray = (): SingleTransactionTemp[] => {
     const transactions = gctransactions?.data?.transactions;
     if (!transactions) return [];
@@ -54,7 +64,7 @@ export const GoCardlessTransactions = ({
 
   const returnGroupName = (transactionId: string) => {
     const transaction = expensesQuery?.data?.find((item) => item.transactionId === transactionId);
-    return transaction?.group?.name ? ` to ${transaction.group.name}` : '';
+    return transaction?.group?.name ? ` ${t('to')} ${transaction.group.name}` : '';
   };
 
   if (!env.NEXT_PUBLIC_GOCARDLESS_ENABLED) {
@@ -66,14 +76,14 @@ export const GoCardlessTransactions = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p>Bank transactions</p>
+        <p>{t('bank_transactions')}</p>
         <Button
           variant="ghost"
           className=" px-0 text-primary"
           disabled={(multipleArray?.length || 0) === 0}
           onClick={addMultipleExpenses}
         >
-          Submit all
+          {t('submit_all')}
         </Button>
       </div>
       {gctransactions.isInitialLoading ? (
@@ -83,7 +93,7 @@ export const GoCardlessTransactions = ({
       ) : (
         <>
           {transactionsArray?.length === 0 && (
-            <div className="mt-[30vh] text-center text-gray-400">No transactions yet</div>
+            <div className="mt-[30vh] text-center text-gray-400">{t('no_transactions_yet')}</div>
           )}
           {transactionsArray
             ?.filter((item) => item.transactionAmount.amount.includes('-'))
@@ -153,9 +163,9 @@ export const GoCardlessTransactions = ({
                         {item.remittanceInformationUnstructured}
                       </p>
                       <p className={`flex text-center text-xs text-gray-500`}>
-                        {item.pending && 'Pending'}{' '}
+                        {item.pending && t('pending')}{' '}
                         {alreadyAdded(item.transactionId) &&
-                          `(Already added${returnGroupName(item.transactionId)})`}
+                          `(${t('already_added')}${returnGroupName(item.transactionId)})`}
                       </p>
                     </div>
                   </button>

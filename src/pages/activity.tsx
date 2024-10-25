@@ -29,13 +29,13 @@ function getPaymentString(
     return null;
   } else if (isSettlement) {
     return (
-      <div className={`${user.id === paidBy ? ' text-emerald-500' : 'text-orange-500'} text-sm`}> 
-          {user.id === paidBy ? t('you_settled') : t('settled')}  {currency} {toUIString(amount)}
+      <div className={`${user.id === paidBy ? ' text-emerald-500' : 'text-orange-500'} text-sm`}>
+        {user.id === paidBy ? t('you_settled') : t('settled')} {currency} {toUIString(amount)}
       </div>
     );
   } else {
     return (
-        <div className={`${user.id === paidBy ? ' text-emerald-500' : 'text-orange-500'} text-sm`}>
+      <div className={`${user.id === paidBy ? ' text-emerald-500' : 'text-orange-500'} text-sm`}>
         {user.id === paidBy
           ? `${t('you_lent')} ${currency}
         ${toUIString(Math.abs(expenseUserAmt))}`
@@ -87,8 +87,8 @@ const ActivityPage: NextPageWithUser = ({ user }) => {
                             {e.expense.deletedBy === user.id
                               ? t('you')
                               : e.expense.deletedByUser.name ?? e.expense.deletedByUser.email}
-                          </span>
-                          {' '}{t('expense_deleted_by')}{' '}
+                          </span>{' '}
+                          {t('expense_activity_deleted_by')}{' '}
                           <span className=" font-semibold ">{e.expense.name}</span>
                         </p>
                       ) : (
@@ -97,8 +97,8 @@ const ActivityPage: NextPageWithUser = ({ user }) => {
                             {e.expense.paidBy === user.id
                               ? t('you')
                               : e.expense.paidByUser.name ?? e.expense.paidByUser.email}
-                          </span>
-                          {' paid for '}
+                          </span>{' '}
+                          {t('expense_paid_by')}{' '}
                           <span className=" font-semibold text-gray-800 dark:text-gray-300">
                             {e.expense.name}
                           </span>
@@ -118,7 +118,7 @@ const ActivityPage: NextPageWithUser = ({ user }) => {
                         )}
                       </div>
                       <p className="text-xs text-gray-500">
-                        {t('local_date', {value: new Date(e.expense.expenseDate)})}
+                        {format(e.expense.expenseDate, 'dd MMM')}
                       </p>
                     </div>
                   </Link>

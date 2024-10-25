@@ -24,6 +24,7 @@ export const SelectUserOrGroup: React.FC<{
     useAddExpenseStore((s) => s.actions);
 
     const { t, ready } = useTranslation();
+
     // Ensure i18n is ready
     useEffect(() => {
       if (!ready) return; // Don't render the component until i18n is ready
@@ -109,7 +110,7 @@ export const SelectUserOrGroup: React.FC<{
               onClick={() => onAddEmailClick(false)}
             >
               <SendIcon className="mr-2 h-4 w-4" />
-              Send invite to user
+              {t('addmember_invite_user')}
             </Button>
           )}
           <Button
@@ -119,7 +120,7 @@ export const SelectUserOrGroup: React.FC<{
             onClick={() => onAddEmailClick(false)}
           >
             <UserPlusIcon className="mr-2 h-4 w-4" />
-            Add to Split Pro
+            {t('addmember_add_to_split')}
           </Button>
         </div>
       </div>

@@ -22,92 +22,6 @@ import { GoCardlessTransactions } from './GoCardlessTransactions';
 import '../../i18n/config';
 import { useTranslation } from 'react-i18next';
 
-const categories = {
-  entertainment: {
-    name: 'Entertainment',
-    items: [
-      {
-        games: 'Games',
-        movies: 'Movies',
-        music: 'Music',
-        sports: 'Sports',
-        other: 'Entertainment',
-      },
-    ],
-  },
-  food: {
-    name: 'Food & Drinks',
-    items: [
-      {
-        diningOut: 'Dining Out',
-        groceries: 'Groceries',
-        liquor: 'Liquor',
-        other: 'Food & Drinks',
-      },
-    ],
-  },
-  home: {
-    name: 'Home',
-    items: [
-      {
-        electronics: 'Electronics',
-        furniture: 'Furniture',
-        supplies: 'Supplies',
-        maintenance: 'Maintenance',
-        mortgage: 'Mortgage',
-        pets: 'Pets',
-        rent: 'Rent',
-        services: 'Services',
-        other: 'Home',
-      },
-    ],
-  },
-  life: {
-    name: 'Life',
-    items: [
-      {
-        childcare: 'Childcare',
-        clothing: 'Clothing',
-        education: 'Education',
-        gifts: 'Gifts',
-        medical: 'Medical',
-        taxes: 'Taxes',
-        other: 'Life',
-      },
-    ],
-  },
-  travel: {
-    name: 'Travel',
-    items: [
-      {
-        bus: 'Bus',
-        train: 'Train',
-        car: 'Car',
-        fuel: 'Fuel',
-        parking: 'Parking',
-        plane: 'Plane',
-        taxi: 'Taxi',
-        other: 'Travel',
-      },
-    ],
-  },
-  utilities: {
-    name: 'Utilities',
-    items: [
-      {
-        cleaning: 'Cleaning',
-        electricity: 'Electricity',
-        gas: 'Gas',
-        internet: 'Internet',
-        trash: 'Trash',
-        phone: 'Phone',
-        water: 'Water',
-        other: 'Utilities',
-      },
-    ],
-  },
-};
-
 export type TransactionAddInputModel = {
   date: Date;
   description: string;
@@ -136,6 +50,97 @@ export const AddExpensePage: React.FC<{
   const isFileUploading = useAddExpenseStore((s) => s.isFileUploading);
 
   const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
+
+  const categories = {
+    entertainment: {
+      name: t('category_entertainment'),
+      items: [
+        {
+          games: t('category_games'),
+          movies: t('category_movies'),
+          music: t('category_music'),
+          sports: t('category_sports'),
+          other: t('category_entertainment'),
+        },
+      ],
+    },
+    food: {
+      name: t('category_food'),
+      items: [
+        {
+          diningOut: t('category_diningOut'),
+          groceries: t('category_groceries'),
+          liquor: t('category_liquor'),
+          other: t('category_food'),
+        },
+      ],
+    },
+    home: {
+      name: t('category_home'),
+      items: [
+        {
+          electronics: t('category_electronics'),
+          furniture: t('category_furniture'),
+          supplies: t('category_supplies'),
+          maintenance: t('category_maintenance'),
+          mortgage: t('category_mortgage'),
+          pets: t('category_pets'),
+          rent: t('category_rent'),
+          services: t('category_services'),
+          other: t('category_home'),
+        },
+      ],
+    },
+    life: {
+      name: t('category_life'),
+      items: [
+        {
+          childcare: t('category_childcare'),
+          clothing: t('category_clothing'),
+          education: t('category_education'),
+          gifts: t('category_gifts'),
+          medical: t('category_medical'),
+          taxes: t('category_taxes'),
+          other: t('category_life'),
+        },
+      ],
+    },
+    travel: {
+      name: t('category_travel'),
+      items: [
+        {
+          bus: t('category_bus'),
+          train: t('category_train'),
+          car: t('category_car'),
+          fuel: t('category_fuel'),
+          parking: t('category_parking'),
+          plane: t('category_plane'),
+          taxi: t('category_taxi'),
+          other: t('category_travel'),
+        },
+      ],
+    },
+    utilities: {
+      name: t('category_utilities'),
+      items: [
+        {
+          cleaning: t('category_cleaning'),
+          electricity: t('category_electricity'),
+          gas: t('category_gas'),
+          internet: t('category_internet'),
+          trash: t('category_trash'),
+          phone: t('category_phone'),
+          water: t('category_water'),
+          other: t('category_utilities'),
+        },
+      ],
+    },
+  };
 
   const { setCurrency, setCategory, setDescription, setAmount, resetState } = useAddExpenseStore(
     (s) => s.actions,
@@ -473,8 +478,7 @@ export const AddExpensePage: React.FC<{
                             format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? (
                               t('today')
                             ) : (
-                              //format(date, 'MMM dd')
-                              t('local_date', { value: new Date(date) })
+                              format(date, 'MMM dd')
                             )
                           ) : (
                             <span>{t('expense_date')}</span>
