@@ -1,52 +1,17 @@
 import { env } from "~/env";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
-import NordigenClient from "nordigen-node"
+import NordigenClient, { type GetTransactions } from "nordigen-node"
 
 const client = new NordigenClient({
   secretId: env.GOCARDLESS_SECRET_ID,
   secretKey: env.GOCARDLESS_SECRET_KEY
 });
 
-export interface GoCardlessTransaction {
-  transactionId: string;
-  entryReference: string;
-  bookingDate: string;
-  valueDate: string;
-  transactionAmount: {
-    amount: string
-    currency: string
-  }
-  remittanceInformationUnstructured: string;
-  remittanceInformationStructured: string;
-  additionalInformation: string;
-  internalTransactionId: string;
-}
-
-interface GoCardlessGetTransactions {
-  transactions: {
-    booked: GoCardlessTransaction[]
-    pending: GoCardlessTransaction[]
-  }
-}
-
-const SingleTransaction = z.object({
-  bookingDate: z.string(),
-  remittanceInformationUnstructured: z.string(),
-  transactionId: z.string(),
-  transactionAmount: z.object({
-    amount: z.string(),
-    currency: z.string()
-  })
-})
-
-export type SingleTransactionType = z.infer<typeof SingleTransaction>;
-
 export const gocardlessRouter = createTRPCRouter({
   getTransactions: protectedProcedure
     .input(z.string().optional())
-    .query(async ({ input, ctx }) => {
-      const requisitionId = input
+    .query(async ({ input: requisitionId, ctx }) => {
       if (!requisitionId) return
 
       await client.generateToken();
@@ -65,7 +30,7 @@ export const gocardlessRouter = createTRPCRouter({
           if (!cachedData.data) {
             throw new Error('Failed to fetch cached transactions');
           }
-          return JSON.parse(cachedData.data) as GoCardlessGetTransactions;
+          return JSON.parse(cachedData.data) as GetTransactions;
         }
       }
 
@@ -87,10 +52,11 @@ export const gocardlessRouter = createTRPCRouter({
   }),
   connectToBank: protectedProcedure
     .input(z.string().optional())
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input: institutionId, ctx }) => {
+      if (!institutionId) return
+
       await client.generateToken();
 
-      const institutionId = input ?? "NORDEA_NDEASESS";
       const generateRandomId = Array.from({ length: 60 }, () => Math.random().toString(36)[2]).join('');
 
       const init = await client.initSession({
@@ -118,18 +84,19 @@ export const gocardlessRouter = createTRPCRouter({
       return init;
   }),
   getInstitutions: protectedProcedure
-    .input(z.string().optional())
-    .query(async ({ input }) => {
-      const country = input
-
+    .query(async () => {
       await client.generateToken();
 
-      const institutionsData = await client.institution.getInstitutions(country ? {country} : undefined)
+      const institutionsData = await client.institution.getInstitutions(env.GOCARDLESS_COUNTRY ? {country: env.GOCARDLESS_COUNTRY} : undefined)
 
       if (!institutionsData) {
         throw new Error('Failed to fetch institutions');
       }
   
       return institutionsData;
+  }),
+  gocardlessEnabled: publicProcedure
+    .query(async () => {
+      return env.GOCARDLESS_ENABLED ?? false
   }),
 })

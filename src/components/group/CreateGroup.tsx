@@ -12,7 +12,6 @@ import { Button } from '../ui/button';
 import '../../i18n/config';
 import { useTranslation } from 'react-i18next';
 
-
 export const CreateGroup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -27,7 +26,9 @@ export const CreateGroup: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [ready]);
 
   const groupSchema = z.object({
-    name: z.string({ required_error: t('group_name_empty') }).min(1, { message: t('group_name_empty') }),
+    name: z
+      .string({ required_error: t('group_name_empty') })
+      .min(1, { message: t('group_name_empty') }),
   });
 
   const groupForm = useForm<z.infer<typeof groupSchema>>({
@@ -86,7 +87,11 @@ export const CreateGroup: React.FC<{ children: React.ReactNode }> = ({ children 
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormControl>
-                      <Input placeholder={t('group_name_placeholder')}className="w-full py-2 text-lg" {...field} />
+                      <Input
+                        placeholder={t('group_name_placeholder')}
+                        className="w-full py-2 text-lg"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

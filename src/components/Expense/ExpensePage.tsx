@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { toUIString } from '~/utils/numbers';
 import { UserAvatar } from '../ui/avatar';
 import Image from 'next/image';
-import { AppDrawer, Drawer, DrawerContent, DrawerTrigger } from '../ui/drawer';
+import { AppDrawer } from '../ui/drawer';
 import { Separator } from '../ui/separator';
 import { CategoryIcons } from '../ui/categoryIcons';
 import { Banknote } from 'lucide-react';
@@ -37,30 +37,29 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
   }, [ready]);
 
   return (
-    <div className="">
+    <div>
       <div className="mb-4 flex items-start justify-between gap-2 px-6">
         <div className="flex items-start gap-4">
           <div className="rounded-lg border p-2 text-xl">
             <CategoryIcon className="text-gray-400" size={24} />
           </div>
           <div className="flex flex-col gap-2">
-            <p className="">{expense.name}</p>
+            <p>{expense.name}</p>
             <p className="text-2xl font-semibold">
               {expense.currency} {toUIString(expense.amount ?? 0)}
             </p>
             {!isSameDay(expense.expenseDate, expense.createdAt) ? (
-              <p className="text-sm text-gray-500">
-                {format(expense.expenseDate, 'dd MMM yyyy')}</p>
+              <p className="text-sm text-gray-500">{format(expense.expenseDate, 'dd MMM yyyy')}</p>
             ) : null}
             {expense.deletedByUser ? (
               <p className=" text-sm text-orange-600">
-                {t('expense_deleted_by')} {expense.deletedByUser.name ?? expense.addedByUser.email} {t('on')}{' '}
-                {format(expense.deletedAt ?? expense.createdAt, 'dd MMM yyyy')}
+                {t('expense_deleted_by')} {expense.deletedByUser.name ?? expense.addedByUser.email}{' '}
+                {t('on')} {format(expense.deletedAt ?? expense.createdAt, 'dd MMM yyyy')}
               </p>
             ) : (
               <p className=" text-sm text-gray-500">
-                {t('expense_added_by')} {expense.addedByUser.name ?? expense.addedByUser.email} {t('on')}{' '}
-                {format(expense.createdAt, 'dd MMM yyyy')}
+                {t('expense_added_by')} {expense.addedByUser.name ?? expense.addedByUser.email}{' '}
+                {t('on')} {format(expense.createdAt, 'dd MMM yyyy')}
               </p>
             )}
           </div>

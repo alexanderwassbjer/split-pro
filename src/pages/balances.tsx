@@ -20,7 +20,6 @@ import '../i18n/config';
 import { useTranslation } from 'react-i18next';
 
 const BalancePage: NextPageWithUser = () => {
-
   const { t, ready } = useTranslation();
 
   function shareWithFriends() {
@@ -58,7 +57,7 @@ const BalancePage: NextPageWithUser = () => {
         }
       >
         <NotificationModal />
-        <div className="">
+        <div>
           <div className="mx-4 flex items-stretch justify-between gap-4">
             {balanceQuery.data?.youOwe.length ? (
               <div className="w-1/2  rounded-2xl border px-2 py-2">
@@ -75,9 +74,7 @@ const BalancePage: NextPageWithUser = () => {
                       <span className="text-orange-600">
                         {b.currency.toUpperCase()} {toUIString(b.amount)}
                       </span>
-                      {index !== balanceQuery.data.youOwe.length - 1 ? (
-                        <span className="">+</span>
-                      ) : null}
+                      {index !== balanceQuery.data.youOwe.length - 1 ? <span>+</span> : null}
                     </span>
                   ))}
                 </div>

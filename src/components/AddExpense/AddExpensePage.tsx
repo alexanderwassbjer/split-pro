@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
-import { calculateParticipantSplit, useAddExpenseStore } from '~/store/addStore';
+import { calculateParticipantSplit, type Participant, useAddExpenseStore } from '~/store/addStore';
 import { api } from '~/utils/api';
 import { UserInput } from './UserInput';
 import { SelectUserOrGroup } from './SelectUserOrGroup';
@@ -158,8 +158,44 @@ export const AddExpensePage: React.FC<{
     setAmount(Number(_amt) || 0);
   }
 
+  const returnMutateObject = ({
+    name,
+    currency,
+    amount,
+    paidBy,
+    date,
+    transactionId,
+    participants,
+  }: {
+    name: string;
+    currency: string;
+    amount: number;
+    paidBy: number;
+    date?: Date;
+    transactionId?: string;
+    participants: Participant[];
+  }) => {
+    const { splitType, fileKey } = useAddExpenseStore.getState();
+
+    return {
+      name,
+      currency,
+      amount,
+      splitType,
+      participants: participants.map((p) => ({
+        userId: p.id,
+        amount: p.amount ?? 0,
+      })),
+      paidBy,
+      category,
+      fileKey,
+      expenseDate: date,
+      transactionId: transactionId,
+    };
+  };
+
   async function addMultipleExpenses() {
-    const { group, paidBy, splitType, fileKey } = useAddExpenseStore.getState();
+    const { group, paidBy, splitType } = useAddExpenseStore.getState();
     if (!paidBy) {
       return;
     }
@@ -177,37 +213,29 @@ export const AddExpensePage: React.FC<{
 
         if (group) {
           await addGroupExpenseMutation.mutateAsync({
-            name: tempItem.description,
-            currency: tempItem.currency,
-            amount: _amt,
+            ...returnMutateObject({
+              name: tempItem.description,
+              currency: tempItem.currency,
+              amount: _amt,
+              paidBy: paidBy.id,
+              date: tempItem.date,
+              transactionId: tempItem.transactionId,
+              participants: tempParticipants,
+            }),
             groupId: group.id,
-            splitType,
-            participants: tempParticipants.map((p) => ({
-              userId: p.id,
-              amount: p.amount ?? 0,
-            })),
-            paidBy: paidBy.id,
-            category,
-            fileKey,
-            expenseDate: tempItem.date,
-            transactionId: tempItem.transactionId,
           });
         } else {
-          await addExpenseMutation.mutateAsync({
-            name: tempItem.description,
-            currency: tempItem.currency,
-            amount: _amt,
-            splitType,
-            participants: tempParticipants.map((p) => ({
-              userId: p.id,
-              amount: p.amount ?? 0,
-            })),
-            paidBy: paidBy.id,
-            category,
-            fileKey,
-            expenseDate: tempItem.date,
-            transactionId: tempItem.transactionId,
-          });
+          await addExpenseMutation.mutateAsync(
+            returnMutateObject({
+              name: tempItem.description,
+              currency: tempItem.currency,
+              amount: _amt,
+              paidBy: paidBy.id,
+              date: tempItem.date,
+              transactionId: tempItem.transactionId,
+              participants: tempParticipants,
+            }),
+          );
         }
       }
     }
@@ -220,7 +248,7 @@ export const AddExpensePage: React.FC<{
   }
 
   function addExpense() {
-    const { group, paidBy, splitType, fileKey } = useAddExpenseStore.getState();
+    const { group, paidBy } = useAddExpenseStore.getState();
     if (!paidBy) {
       return;
     }
@@ -228,26 +256,21 @@ export const AddExpensePage: React.FC<{
     if (group) {
       addGroupExpenseMutation.mutate(
         {
-          name: description,
-          currency,
-          amount,
+          ...returnMutateObject({
+            name: description,
+            currency,
+            amount,
+            paidBy: paidBy.id,
+            date: date,
+            transactionId: transactionId,
+            participants: participants,
+          }),
           groupId: group.id,
-          splitType,
-          participants: participants.map((p) => ({
-            userId: p.id,
-            amount: p.amount ?? 0,
-          })),
-          paidBy: paidBy.id,
-          category,
-          fileKey,
-          expenseDate: date,
-          transactionId: transactionId,
         },
         {
           onSuccess: (d) => {
             if (d) {
               router
-                // I think this makes more sence.
                 .push(`/groups/${group.id}`)
                 .then(() => resetState())
                 .catch(console.error);
@@ -257,27 +280,20 @@ export const AddExpensePage: React.FC<{
       );
     } else {
       addExpenseMutation.mutate(
-        {
+        returnMutateObject({
           name: description,
           currency,
           amount,
-          splitType,
-          participants: participants.map((p) => ({
-            userId: p.id,
-            amount: p.amount ?? 0,
-          })),
           paidBy: paidBy.id,
-          category,
-          fileKey,
-          expenseDate: date,
+          date: date,
           transactionId: transactionId,
-        },
+          participants: participants,
+        }),
         {
           onSuccess: (d) => {
             resetState();
             if (participants[1] && d) {
               router
-                // I think this makes more sence.
                 .push(`/balances/${participants[1]?.id}`)
                 .then(() => resetState())
                 .catch(console.error);
@@ -298,7 +314,7 @@ export const AddExpensePage: React.FC<{
     setTransactionId(obj.transactionId ?? '');
   };
 
-  const resetAll = () => {
+  const clearFields = () => {
     setAmount(0);
     setDescription('');
     setAmountStr('');
@@ -311,7 +327,7 @@ export const AddExpensePage: React.FC<{
         <div className="flex items-center justify-between">
           {participants.length === 1 ? (
             <Link href="/balances">
-              <Button onClick={resetAll} variant="ghost" className=" px-0 text-primary">
+              <Button onClick={clearFields} variant="ghost" className=" px-0 text-primary">
                 {t('cancel')}
               </Button>
             </Link>
@@ -352,13 +368,13 @@ export const AddExpensePage: React.FC<{
                 className="h-[70vh]"
                 shouldCloseOnAction
               >
-                <div className="">
+                <div>
                   {Object.entries(categories).map(([categoryName, categoryDetails]) => {
                     return (
                       <div key={categoryName} className="mb-8">
                         <h3 className="mb-4 text-lg font-semibold">{categoryDetails.name}</h3>
                         <div className="flex flex-wrap justify-between gap-2">
-                          {categoryDetails.items.map((item, index) =>
+                          {categoryDetails.items.map((item) =>
                             Object.entries(item).map(([key, value]) => {
                               const Icon =
                                 CategoryIcons[key] ?? CategoryIcons[categoryName] ?? Banknote;
@@ -409,7 +425,7 @@ export const AddExpensePage: React.FC<{
                   if (openVal !== open) setOpen(openVal);
                 }}
               >
-                <div className="">
+                <div>
                   <Command className="h-[50vh]">
                     <CommandInput className="text-lg" placeholder={t('expense_currency_search')} />
                     <CommandEmpty>{t('expense_currency_notfound')}.</CommandEmpty>
@@ -515,7 +531,7 @@ export const AddExpensePage: React.FC<{
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-4">
-                  <Button variant="ghost" className=" px-0 text-primary" onClick={resetAll}>
+                  <Button variant="ghost" className=" px-0 text-primary" onClick={clearFields}>
                     Clear
                   </Button>
                 </div>
@@ -526,7 +542,7 @@ export const AddExpensePage: React.FC<{
               addMultipleExpenses={addMultipleExpenses}
               multipleArray={multipleArray}
               setMultipleArray={(a: TransactionAddInputModel[]) => {
-                resetAll();
+                clearFields();
                 setMultipleArray(a);
               }}
             />

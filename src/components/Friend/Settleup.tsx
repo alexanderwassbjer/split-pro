@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Button } from '../ui/button';
-import { AppDrawer, Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '../ui/drawer';
+import { AppDrawer, DrawerClose } from '../ui/drawer';
 import { type User, type Balance, SplitType } from '@prisma/client';
 import { type User as NextUser } from 'next-auth';
 import { FriendBalance } from './FirendBalance';
@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import { toFixedNumber } from '~/utils/numbers';
 import '../../i18n/config';
 import { useTranslation } from 'react-i18next';
-
 
 export const SettleUp: React.FC<{
   balances: Array<Balance>;
@@ -32,7 +31,6 @@ export const SettleUp: React.FC<{
   useEffect(() => {
     if (!ready) return; // Don't render the component until i18n is ready
   }, [ready]);
-
 
   const isCurrentUserPaying = (balanceToSettle?.amount ?? 0) < 0;
 
@@ -72,7 +70,7 @@ export const SettleUp: React.FC<{
         onSuccess: () => {
           utils.user.invalidate().catch(console.error);
         },
-        onError: (error) => {
+        onError: () => {
           toast.info(t('expense_save_error'));
         },
       },

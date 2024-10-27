@@ -14,7 +14,8 @@ export const GoCardlessBankAccountSelect = () => {
   const [open, setOpen] = React.useState(false);
   const userQuery = api.user.me.useQuery();
   const updateProfile = api.user.updateUserDetail.useMutation();
-  const institutions = api.gocardless.getInstitutions.useQuery(env.NEXT_PUBLIC_GOCARDLESS_COUNTRY);
+  const institutions = api.gocardless.getInstitutions.useQuery();
+  const gocardlessEnabled = api.gocardless.gocardlessEnabled.useQuery();
 
   const { t, ready } = useTranslation();
 
@@ -23,7 +24,7 @@ export const GoCardlessBankAccountSelect = () => {
     if (!ready) return; // Don't render the component until i18n is ready
   }, [ready]);
 
-  if (!env.NEXT_PUBLIC_GOCARDLESS_ENABLED) {
+  if (!gocardlessEnabled) {
     return <></>;
   }
 
@@ -57,7 +58,7 @@ export const GoCardlessBankAccountSelect = () => {
         if (openVal !== open) setOpen(openVal);
       }}
     >
-      <div className="">
+      <div>
         <Command className="h-[50vh]">
           <CommandInput className="text-lg" placeholder={t('search_bank')} />
           <CommandEmpty>{t('no_bank_providers_found')}</CommandEmpty>

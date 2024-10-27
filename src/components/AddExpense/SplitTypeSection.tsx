@@ -33,9 +33,10 @@ export const SplitTypeSection: React.FC = () => {
         trigger={
           <p className="overflow-hidden text-ellipsis text-nowrap px-1.5 text-[16.5px] text-cyan-500 lg:max-w-48">
             {
-              (currentUser?.id === paidBy?.id ? t('you_split') : paidBy?.name ?? paidBy?.email)?.split(
-                ' ',
-              )[0]
+              (currentUser?.id === paidBy?.id
+                ? t('you_split')
+                : paidBy?.name ?? paidBy?.email
+              )?.split(' ')[0]
             }
           </p>
         }
@@ -154,27 +155,20 @@ const SplitEqualSection: React.FC = () => {
   const allSelected = participants.every((p) => p.splitShare !== 0);
 
   return (
-    <div className="mt-4 flex flex-col gap-6 px-2 relative">
+    <div className="relative mt-4 flex flex-col gap-6 px-2">
       <div className="flex items-center">
-        <div className="mb-2 flex-grow flex justify-center">
-          <div
-            className={`${canSplitScreenClosed ? 'text-gray-300' : 'text-red-500'
-              }`}
-          >
+        <div className="mb-2 flex flex-grow justify-center">
+          <div className={`${canSplitScreenClosed ? 'text-gray-300' : 'text-red-500'}`}>
             {currency} {(amount / totalParticipants).toFixed(2)} {t('per_person')}
           </div>
         </div>
       </div>
-      <div className="absolute top-0 right-0">
+      <div className="absolute right-0 top-0">
         <button
-          className="flex items-center gap-1 border rounded-md py-0.5 px-2 whitespace-nowrap"
+          className="flex items-center gap-1 whitespace-nowrap rounded-md border px-2 py-0.5"
           onClick={selectAll}
         >
-          {allSelected ? (
-            <X className="h-4 w-4" />
-          ) : (
-            <Check className="h-4 w-4" />
-          )}
+          {allSelected ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
           <span className="text-sm">All</span>
         </button>
       </div>
@@ -359,7 +353,9 @@ const SplitByShareSection: React.FC = () => {
 
   return (
     <div className="mt-4 flex flex-col gap-6 px-2">
-      <div className="mb-2 text-center text-gray-300">{t('total_shares')} {totalShare}</div>
+      <div className="mb-2 text-center text-gray-300">
+        {t('total_shares')} {totalShare}
+      </div>
       {participants.map((p) => (
         <div key={p.id} className="flex justify-between">
           <UserAndAmount user={p} currency={currency} />

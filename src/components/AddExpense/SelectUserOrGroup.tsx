@@ -23,12 +23,12 @@ export const SelectUserOrGroup: React.FC<{
   const { addOrUpdateParticipant, removeParticipant, setNameOrEmail, setGroup, setParticipants } =
     useAddExpenseStore((s) => s.actions);
 
-    const { t, ready } = useTranslation();
+  const { t, ready } = useTranslation();
 
-    // Ensure i18n is ready
-    useEffect(() => {
-      if (!ready) return; // Don't render the component until i18n is ready
-    }, [ready]);
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
 
   const friendsQuery = api.user.getFriends.useQuery();
   const groupsQuery = api.group.getAllGroups.useQuery();
@@ -82,9 +82,7 @@ export const SelectUserOrGroup: React.FC<{
   }
 
   if (group) {
-    return (
-      <div className="mt-4 text-center text-red-500">{t('select_group_error')}</div>
-    );
+    return <div className="mt-4 text-center text-red-500">{t('select_group_error')}</div>;
   }
 
   return (

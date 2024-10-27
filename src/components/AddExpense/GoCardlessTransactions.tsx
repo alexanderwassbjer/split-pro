@@ -8,7 +8,7 @@ import { env } from '~/env';
 import '../../i18n/config';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
-import { type SingleTransactionType } from '~/server/api/routers/gocardless';
+import { type Transaction } from 'nordigen-node';
 
 type Props = {
   add: (obj: TransactionAddInputModel) => void;
@@ -17,14 +17,7 @@ type Props = {
   setMultipleArray: (a: TransactionAddInputModel[]) => void;
 };
 
-type SingleTransactionTemp = {
-  bookingDate: string;
-  remittanceInformationUnstructured: string;
-  transactionId: string;
-  transactionAmount: {
-    amount: string;
-    currency: string;
-  };
+type TransactionWithPendingStatus = Transaction & {
   pending: boolean;
 };
 
@@ -38,6 +31,7 @@ export const GoCardlessTransactions = ({
   const gctransactions = api.gocardless.getTransactions.useQuery(userQuery.data?.gocardlessId);
 
   const expensesQuery = api.user.getOwnExpenses.useQuery();
+  const gocardlessEnabled = api.gocardless.gocardlessEnabled.useQuery();
 
   const { t, ready } = useTranslation();
 
@@ -46,11 +40,11 @@ export const GoCardlessTransactions = ({
     if (!ready) return; // Don't render the component until i18n is ready
   }, [ready]);
 
-  const returnTransactionsArray = (): SingleTransactionTemp[] => {
+  const returnTransactionsArray = (): TransactionWithPendingStatus[] => {
     const transactions = gctransactions?.data?.transactions;
     if (!transactions) return [];
 
-    const mapTransactions = (items: SingleTransactionType[], pendingStatus: boolean) =>
+    const mapTransactions = (items: Transaction[], pendingStatus: boolean) =>
       items?.map((cItem) => ({ ...cItem, pending: pendingStatus })) || [];
 
     const pending = mapTransactions(transactions.pending, true);
@@ -67,11 +61,36 @@ export const GoCardlessTransactions = ({
     return transaction?.group?.name ? ` ${t('to')} ${transaction.group.name}` : '';
   };
 
-  if (!env.NEXT_PUBLIC_GOCARDLESS_ENABLED) {
+  if (!gocardlessEnabled) {
     return <></>;
   }
 
   const transactionsArray = returnTransactionsArray();
+
+  const onTransactionRowClick = (item: TransactionWithPendingStatus, multiple: boolean) => {
+    const transactionData = {
+      date: new Date(item.bookingDate),
+      amount: item.transactionAmount.amount.replace('-', ''),
+      currency: item.transactionAmount.currency,
+      description: item.remittanceInformationUnstructured,
+      transactionId: item.transactionId,
+    };
+
+    if (multiple) {
+      const isInMultipleArray = multipleArray?.some(
+        (cItem) => cItem.transactionId === item.transactionId,
+      );
+
+      setMultipleArray(
+        isInMultipleArray
+          ? multipleArray.filter((cItem) => cItem.transactionId !== item.transactionId)
+          : [...multipleArray, transactionData],
+      );
+    } else {
+      add(transactionData);
+      document.getElementById('mainlayout')?.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -106,43 +125,14 @@ export const GoCardlessTransactions = ({
                     )}
                     disabled={alreadyAdded(item.transactionId)}
                     onCheckedChange={() => {
-                      if (
-                        multipleArray?.some((cItem) => cItem.transactionId === item.transactionId)
-                      ) {
-                        setMultipleArray(
-                          multipleArray.filter(
-                            (cItem) => cItem.transactionId !== item.transactionId,
-                          ),
-                        );
-                      } else {
-                        setMultipleArray([
-                          ...multipleArray,
-                          {
-                            date: new Date(item.bookingDate),
-                            amount: item.transactionAmount.amount.replace('-', ''),
-                            currency: item.transactionAmount.currency,
-                            description: item.remittanceInformationUnstructured,
-                            transactionId: item.transactionId,
-                          },
-                        ]);
-                      }
+                      onTransactionRowClick(item, true);
                     }}
                   />
-                  <button
+                  <Button
                     className="flex items-center gap-4"
+                    variant="ghost"
                     disabled={alreadyAdded(item.transactionId)}
-                    onClick={() => {
-                      add({
-                        date: new Date(item.bookingDate),
-                        amount: item.transactionAmount.amount.replace('-', ''),
-                        currency: item.transactionAmount.currency,
-                        description: item.remittanceInformationUnstructured,
-                        transactionId: item.transactionId,
-                      });
-                      document
-                        .getElementById('mainlayout')
-                        ?.scrollTo({ top: 0, behavior: 'instant' });
-                    }}
+                    onClick={() => onTransactionRowClick(item, false)}
                   >
                     <div className="text-xs text-gray-500">
                       {format(item.bookingDate, 'MMM dd')
@@ -168,7 +158,7 @@ export const GoCardlessTransactions = ({
                           `(${t('already_added')}${returnGroupName(item.transactionId)})`}
                       </p>
                     </div>
-                  </button>
+                  </Button>
                 </div>
                 <div className="min-w-10 shrink-0">
                   <div

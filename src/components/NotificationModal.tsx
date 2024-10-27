@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { env } from '~/env';
-import { Bell, BellOff, ChevronRight } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { api } from '~/utils/api';
 import {
   AlertDialog,
@@ -87,7 +86,7 @@ export const NotificationModal: React.FC = () => {
 
             updatePushSubscription.mutate({ subscription: JSON.stringify(sub) });
           })
-          .catch((e) => {
+          .catch(() => {
             toast.error(t('notifications_error'));
           });
         setModalOpen(false);
@@ -111,12 +110,12 @@ export const NotificationModal: React.FC = () => {
       <AlertDialogContent className=" rounded-lg">
         <AlertDialogHeader>
           <AlertDialogTitle>{t('notification_enable')}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t('notifications_description')}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{t('notifications_description')}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={remindLater}>{t('notifications_remind_later')}</AlertDialogCancel>
+          <AlertDialogCancel onClick={remindLater}>
+            {t('notifications_remind_later')}
+          </AlertDialogCancel>
           <AlertDialogAction onClick={onRequestNotification}>
             <Bell className="mr-1 h-4" />
             {t('subscribe')}
