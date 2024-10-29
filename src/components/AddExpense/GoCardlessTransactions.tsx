@@ -152,7 +152,9 @@ export const GoCardlessTransactions = ({
                       >
                         {item.remittanceInformationUnstructured}
                       </p>
-                      <p className={`flex text-center text-xs text-gray-500`}>
+                      <p
+                        className={`line-clamp-1 flex whitespace-break-spaces text-left text-xs text-gray-500`}
+                      >
                         {item.pending && t('pending')}{' '}
                         {alreadyAdded(item.transactionId) &&
                           `(${t('already_added')}${returnGroupName(item.transactionId)})`}
