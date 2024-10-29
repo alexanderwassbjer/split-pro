@@ -173,6 +173,17 @@ const BalancePage: NextPageWithUser<{
                     ) : null;
                   })}
                 </div>
+                {expensesQuery?.data && expensesQuery?.data?.length > 0 && (
+                  <div className="mt-8">
+                    <p className="font-semibold">First expense</p>
+                    <p>
+                      {format(
+                        expensesQuery.data[expensesQuery.data.length - 1]?.createdAt ?? new Date(),
+                        'yyyy-MM-dd',
+                      )}
+                    </p>
+                  </div>
+                )}
               </div>
             </AppDrawer>
             <AppDrawer
@@ -194,6 +205,12 @@ const BalancePage: NextPageWithUser<{
                   ))}
                 </div>
               </div>
+              {groupDetailQuery?.data?.createdAt && (
+                <div className="mt-8">
+                  <p className="font-semibold ">Group created</p>
+                  <p>{format(groupDetailQuery.data?.createdAt, 'yyyy-MM-dd')}</p>
+                </div>
+              )}
               <div className="mt-8">
                 <p className="font-semibold ">Actions</p>
                 <div className="mt-2 flex flex-col gap-1">
@@ -329,7 +346,7 @@ const BalancePage: NextPageWithUser<{
             <div className=" mb-4 flex justify-center gap-2 overflow-y-auto border-b px-2 pb-4">
               <Link href={`/add?groupId=${groupId}`}>
                 <Button size="sm" className="gap-1 text-sm lg:w-[180px]">
-                {t('add_expense')}
+                  {t('add_expense')}
                 </Button>
               </Link>
               <Button size="sm" className="gap-1 text-sm" variant="secondary">
