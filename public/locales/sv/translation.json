@@ -189,5 +189,8 @@
   "language": "Språk",
   "select_language": "Välj språk",
   "search_language": "Sök efter språk",
-  "no_languages_found": "Inga språk hittades"
+  "no_languages_found": "Inga språk hittades",
+  "verified_transaction": "Verifierad transaktion",
+  "theme": "Tema",
+  "select_theme": "Välj tema"
 }

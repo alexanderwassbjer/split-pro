@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Command, CommandGroup, CommandItem } from '../ui/command';
 import { AppDrawer } from '../ui/drawer';
 import { Check, ChevronRight, Moon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '../ui/button';
 import { useTheme } from 'next-themes';
+import { useTranslation } from 'react-i18next';
 
 const supportedThemes = {
   dark: 'Dark',
@@ -15,6 +16,13 @@ const supportedThemes = {
 export const ThemeSelect = () => {
   const [open, setOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
+
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
 
   const onSelect = async (currentValue: string) => {
     setTheme(currentValue);
@@ -31,13 +39,13 @@ export const ThemeSelect = () => {
         >
           <div className="flex items-center gap-4">
             <Moon className="h-5 w-5 text-violet-500" />
-            <p>Theme</p>
+            <p>{t('theme')}</p>
           </div>
           <ChevronRight className="h-6 w-6 text-gray-500" />
         </Button>
       }
       onTriggerClick={() => setOpen(true)}
-      title={'Select theme'}
+      title={t('select_theme')}
       className="h-[70vh]"
       shouldCloseOnAction
       open={open}

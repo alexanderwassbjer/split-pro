@@ -188,5 +188,8 @@
   "language": "Language",
   "select_language": "Choose language",
   "search_language": "Search language",
-  "no_languages_found": "No language found"
+  "no_languages_found": "No language found",
+  "verified_transaction": "Verified transaction",
+  "theme": "Theme",
+  "select_theme": "Select theme"
 }

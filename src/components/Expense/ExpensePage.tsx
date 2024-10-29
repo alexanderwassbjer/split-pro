@@ -64,7 +64,7 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
             )}
             {expense.transactionId && (
               <p className=" flex gap-2 text-sm text-gray-500">
-                Verified transaction
+                {t('verified_transaction')}
                 <BadgeCheck className="h-4 w-4 text-emerald-500" />
               </p>
             )}
