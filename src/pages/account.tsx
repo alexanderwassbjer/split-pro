@@ -20,10 +20,13 @@ import { UpdateDetails } from '~/components/Account/UpdateDetails';
 import { api } from '~/utils/api';
 import { type NextPageWithUser } from '~/types';
 import { SubscribeNotification } from '~/components/Account/SubscribeNotification';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LoadingSpinner } from '~/components/ui/spinner';
 import { GoCardlessBankAccountSelect } from '~/components/Account/GoCardlessBankAccountSelect';
 import { ThemeSelect } from '~/components/Account/ThemeSelect';
+import '../i18n/config';
+import { useTranslation } from 'react-i18next';
+import { LanguagesSelect } from '~/components/Account/LanguagesSelect';
 
 const AccountPage: NextPageWithUser = ({ user }) => {
   const userQuery = api.user.me.useQuery();
@@ -32,6 +35,13 @@ const AccountPage: NextPageWithUser = ({ user }) => {
   const gocardlessEnabled = api.gocardless.gocardlessEnabled.useQuery();
 
   const [downloading, setDownloading] = useState(false);
+
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
 
   async function downloadData() {
     setDownloading(true);
@@ -56,10 +66,13 @@ const AccountPage: NextPageWithUser = ({ user }) => {
   return (
     <>
       <Head>
-        <title>Account</title>
+        <title>{t('account')}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <MainLayout title="Account" header={<div className="text-3xl font-semibold">Account</div>}>
+      <MainLayout
+        title={t('account')}
+        header={<div className="text-3xl font-semibold">{t('account')}</div>}
+      >
         <div className="mt-4 px-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -87,7 +100,10 @@ const AccountPage: NextPageWithUser = ({ user }) => {
                   >
                     <div className="flex items-center gap-4">
                       <CreditCard className="h-5 w-5 text-teal-500" />
-                      <p>{userQuery.data?.gocardlessId ? 'Reconnect' : 'Connect'} to bank</p>
+                      <p>
+                        {userQuery.data?.gocardlessId ? t('reconnect') : t('connect')}{' '}
+                        {t('to_bank')}
+                      </p>
                     </div>
                     <ChevronRight className="h-6 w-6 text-gray-500" />
                   </Button>
@@ -95,6 +111,7 @@ const AccountPage: NextPageWithUser = ({ user }) => {
               </>
             )}
             <ThemeSelect />
+            <LanguagesSelect />
             <Link href="https://twitter.com/KM_Koushik_" target="_blank">
               <Button
                 variant="ghost"
@@ -242,7 +259,7 @@ const AccountPage: NextPageWithUser = ({ user }) => {
               className="text-orange-600 hover:text-orange-600/90 "
               onClick={() => signOut()}
             >
-              Logout
+              {t('logout')}
             </Button>
           </div>
         </div>

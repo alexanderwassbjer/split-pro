@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Trash2 } from 'lucide-react';
 import { api } from '~/utils/api';
@@ -14,6 +14,8 @@ import {
   AlertDialogTrigger,
 } from '../ui/alert-dialog';
 import { toast } from 'sonner';
+import '../../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 export const DeleteFriend: React.FC<{
   friendId: number;
@@ -25,11 +27,18 @@ export const DeleteFriend: React.FC<{
   const deleteFriendMutation = api.user.deleteFriend.useMutation();
   const utils = api.useUtils();
 
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
+
   const onDeleteFriend = async () => {
     try {
       await deleteFriendMutation.mutateAsync({ friendId });
     } catch (e) {
-      toast.error('Failed to delete user');
+      toast.error(t('delete_user_error'));
       return;
     }
     setShowTrigger(false);
@@ -51,15 +60,15 @@ export const DeleteFriend: React.FC<{
         </AlertDialogTrigger>
         <AlertDialogContent className="max-w-xs rounded-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>{disabled ? '' : 'Are you absolutely sure?'} </AlertDialogTitle>
+            <AlertDialogTitle>{disabled ? '' : t('delete_user_alert_title')} </AlertDialogTitle>
             <AlertDialogDescription>
               {disabled
-                ? "Can't remove friend with outstanding balances. Settle up first"
-                : 'Do you really want to continue'}
+                ? t('delete_user_alert_text_error')
+                : t('delete_user_alert_text')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             {!disabled ? (
               <Button
                 size="sm"
@@ -68,7 +77,7 @@ export const DeleteFriend: React.FC<{
                 disabled={deleteFriendMutation.isLoading}
                 loading={deleteFriendMutation.isLoading}
               >
-                Delete
+                {t('delete')}
               </Button>
             ) : null}
           </AlertDialogFooter>

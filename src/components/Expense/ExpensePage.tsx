@@ -1,7 +1,7 @@
 import { type ExpenseParticipant, type Expense, type User } from '@prisma/client';
 import { type User as NextUser } from 'next-auth';
 import { format, isSameDay } from 'date-fns';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { toUIString } from '~/utils/numbers';
 import { UserAvatar } from '../ui/avatar';
 import Image from 'next/image';
@@ -9,6 +9,9 @@ import { AppDrawer } from '../ui/drawer';
 import { Separator } from '../ui/separator';
 import { CategoryIcons } from '../ui/categoryIcons';
 import { BadgeCheck, Banknote } from 'lucide-react';
+import { env } from '~/env';
+import '../../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 type ExpenseDetailsProps = {
   user: NextUser;
@@ -25,6 +28,13 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
   const youPaid = expense.paidBy === user.id;
 
   const CategoryIcon = CategoryIcons[expense.category] ?? Banknote;
+
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
 
   return (
     <div>
@@ -43,13 +53,13 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
             ) : null}
             {expense.deletedByUser ? (
               <p className=" text-sm text-orange-600">
-                Deleted by {expense.deletedByUser.name ?? expense.addedByUser.email} on{' '}
-                {format(expense.deletedAt ?? expense.createdAt, 'dd MMM yyyy')}
+                {t('expense_deleted_by')} {expense.deletedByUser.name ?? expense.addedByUser.email}{' '}
+                {t('on')} {format(expense.deletedAt ?? expense.createdAt, 'dd MMM yyyy')}
               </p>
             ) : (
               <p className=" text-sm text-gray-500">
-                Added by {expense.addedByUser.name ?? expense.addedByUser.email} on{' '}
-                {format(expense.createdAt, 'dd MMM yyyy')}
+                {t('expense_added_by')} {expense.addedByUser.name ?? expense.addedByUser.email}{' '}
+                {t('on')} {format(expense.createdAt, 'dd MMM yyyy')}
               </p>
             )}
             {expense.transactionId && (
@@ -66,7 +76,7 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
               trigger={
                 <Image
                   src={`${storagePublicUrl}/${expense.fileKey}`}
-                  alt="Expense receipt"
+                  alt={t('expense_receipt')}
                   width={56}
                   height={56}
                   data-loaded="false"
@@ -76,8 +86,8 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
                   className=" h-14 w-14 rounded-md object-cover object-center data-[loaded=false]:animate-pulse data-[loaded=false]:bg-gray-100/10"
                 />
               }
-              leftAction="Close"
-              title="Expense Receipt"
+              leftAction={t('close')}
+              title={t('expense_receipt')}
               className="h-[98vh]"
             >
               <div className="mb-8 overflow-scroll">
@@ -85,7 +95,7 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
                   src={`${storagePublicUrl}/${expense.fileKey}`}
                   width={300}
                   height={800}
-                  alt="Expense receipt"
+                  alt={t('expense_receipt')}
                   data-loaded="false"
                   onLoad={(event) => {
                     event.currentTarget.setAttribute('data-loaded', 'true');
@@ -101,7 +111,7 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
       <div className="mt-10 flex items-center gap-5 px-6">
         <UserAvatar user={expense.paidByUser} size={35} />
         <p>
-          {youPaid ? 'You' : expense.paidByUser.name ?? expense.paidByUser.email} paid{' '}
+          {youPaid ? t('you') : expense.paidByUser.name ?? expense.paidByUser.email} {t('paid')}{' '}
           {expense.currency} {toUIString(expense.amount)}
         </p>
       </div>
@@ -110,7 +120,7 @@ const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ user, expense, storageP
           <div key={p.userId} className="flex items-center gap-2 text-sm text-gray-500">
             <UserAvatar user={p.user} size={25} />
             <p>
-              {user.id === p.userId ? 'You Owe' : `${p.user.name ?? p.user.email} owes`}{' '}
+              {user.id === p.userId ? t('you_owe') : `${p.user.name ?? p.user.email} ${t('owes')}`}{' '}
               {expense.currency}{' '}
               {toUIString((expense.paidBy === p.userId ? expense.amount ?? 0 : 0) - p.amount)}
             </p>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '~/components/ui/button';
 import { UserPlusIcon } from '@heroicons/react/24/solid';
 import { api } from '~/utils/api';
@@ -9,6 +9,10 @@ import { type Group, type GroupUser } from '@prisma/client';
 import { CheckIcon, SendIcon } from 'lucide-react';
 import { Input } from '../ui/input';
 import { z } from 'zod';
+import { env } from '~/env';
+import { isStorageConfigured } from '~/server/storage';
+import '../../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 const AddMembers: React.FC<{
   enableSendingInvites: boolean;
@@ -24,6 +28,12 @@ const AddMembers: React.FC<{
   const addFriendMutation = api.user.inviteFriend.useMutation();
 
   const utils = api.useUtils();
+  const { t, ready } = useTranslation();
+
+  // Ensure i18n is ready
+  useEffect(() => {
+    if (!ready) return; // Don't render the component until i18n is ready
+  }, [ready]);
 
   const groupUserMap = group.groupUsers.reduce(
     (acc, gu) => {
@@ -93,12 +103,12 @@ const AddMembers: React.FC<{
         <div className="flex items-center justify-center gap-2 lg:w-[180px]">{children}</div>
       }
       onTriggerClick={() => setOpen(true)}
-      title="Add members"
-      leftAction="Cancel"
+      title={t('addmembers')}
+      leftAction={t('cancel')}
       actionOnClick={() => onSave(userIds)}
       className="h-[85vh]"
       shouldCloseOnAction
-      actionTitle="Save"
+      actionTitle={t('save')}
       open={open}
       onClose={() => setOpen(false)}
       onOpenChange={(state) => state !== open && setOpen(state)}
@@ -106,12 +116,12 @@ const AddMembers: React.FC<{
       <div>
         <Input
           className="mt-8 w-full text-lg"
-          placeholder="Enter name or email"
+          placeholder={t('addmember_placeholder')}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
         />
         {!isEmail.success ? (
-          <p className="mt-4 text-red-500">Enter valid email</p>
+          <p className="mt-4 text-red-500">{t('addmember_valid_mail')}</p>
         ) : (
           <div>
             {enableSendingInvites ? (
@@ -132,7 +142,7 @@ const AddMembers: React.FC<{
                   onClick={() => onAddEmailClick(true)}
                 >
                   <SendIcon className="mr-2 h-4 w-4" />
-                  {isEmail.success ? 'Send invite to user' : 'Enter valid email'}
+                  {isEmail.success ? t('addmember_invite_user') : t('addmember_valid_mail')}
                 </Button>
               )}
               <Button
@@ -142,7 +152,7 @@ const AddMembers: React.FC<{
                 onClick={() => onAddEmailClick(false)}
               >
                 <UserPlusIcon className="mr-2 h-4 w-4" />
-                {isEmail.success ? 'Add to Split Pro' : 'Enter valid email'}
+                {isEmail.success ? t('addmember_add_to_split') : t('addmember_valid_mail')}
               </Button>
             </div>
           </div>

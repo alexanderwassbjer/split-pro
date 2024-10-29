@@ -13,6 +13,7 @@ import {
   Landmark,
   Split,
   Users,
+  Languages,
 } from 'lucide-react';
 import Image from 'next/image';
 import { BackgroundGradient } from '~/components/ui/background-gradient';
@@ -192,6 +193,15 @@ export default function Home() {
                   <p className="px-4 text-gray-400 lg:px-0">
                     Add expenses faster with a integration to GoCardless bank account transactions
                     api
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1 lg:w-1/2">
+                  <div className="flex flex-row justify-center gap-1 lg:flex-col">
+                    <Languages className="h-6 w-6 text-primary" />
+                    <p className="text-lg font-medium">Multilangauge</p>
+                  </div>
+                  <p className="px-4 text-gray-400 lg:px-0">
+                    SplitPro app has multilanguage support. (More locales are being added)
                   </p>
                 </div>
               </div>
