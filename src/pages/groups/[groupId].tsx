@@ -390,7 +390,7 @@ const BalancePage: NextPageWithUser<{
             <Link
               href={`/groups/${groupId}/expenses/${e.id}`}
               key={e.id}
-              className="flex items-center justify-between px-2 py-2"
+              className="flex items-center justify-between px-2 py-3"
             >
               <div className="flex items-center gap-4">
                 <div className="text-xs text-gray-500">
@@ -416,8 +416,14 @@ const BalancePage: NextPageWithUser<{
                   >
                     <span className="text-[10px]">{isSettlement ? '  🎉  ' : null}</span>
                     {youPaid ? t('you') : e.paidByUser.name ?? e.paidByUser.email}{' '}
-                    {isSettlement ? (youPaid ? t('you_settled') : t('settled')) : (youPaid ? t('you_paid') : t('paid'))} 
-                    {' '}{e.currency}{' '}{toUIString(e.amount)}{' '}
+                    {isSettlement
+                      ? youPaid
+                        ? t('you_settled')
+                        : t('settled')
+                      : youPaid
+                        ? t('you_paid')
+                        : t('paid')}{' '}
+                    {e.currency} {toUIString(e.amount)}{' '}
                   </p>
                 </div>
               </div>
