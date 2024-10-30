@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { type TransactionAddInputModel } from './AddExpensePage';
-import { env } from '~/env';
 import '../../i18n/config';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
@@ -127,6 +126,7 @@ export const GoCardlessTransactions = ({
                     onCheckedChange={() => {
                       onTransactionRowClick(item, true);
                     }}
+                    className="h-6 w-6 md:h-4 md:w-4"
                   />
                   <Button
                     className="flex items-center gap-4"
