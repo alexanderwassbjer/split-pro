@@ -151,7 +151,7 @@ export const groupRouter = createTRPCRouter({
           ctx.session.user.id,
           input.expenseDate ?? new Date(),
           input.fileKey,
-          input.transactionId
+          input.transactionId,
         );
 
         return expense;
@@ -231,7 +231,7 @@ export const groupRouter = createTRPCRouter({
       },
       where: {
         groupId: input.groupId,
-        deletedBy: null,
+        deletedAt: null,
       },
     });
 
