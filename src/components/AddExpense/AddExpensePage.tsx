@@ -30,13 +30,13 @@ export type TransactionAddInputModel = {
   transactionId?: string;
 };
 
-export const AddExpensePage: React.FC<{
+export const AddOrEditExpensePage: React.FC<{
   isStorageConfigured: boolean;
   enableSendingInvites: boolean;
-}> = ({ isStorageConfigured, enableSendingInvites }) => {
+  expenseId?: string;
+}> = ({ isStorageConfigured, enableSendingInvites, expenseId }) => {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [open, setOpen] = React.useState(false);
-  const [amtStr, setAmountStr] = React.useState('');
   const [transactionId, setTransactionId] = React.useState('');
   const [multipleArray, setMultipleArray] = React.useState<TransactionAddInputModel[]>([]);
 
@@ -48,6 +48,7 @@ export const AddExpensePage: React.FC<{
   const category = useAddExpenseStore((s) => s.category);
   const description = useAddExpenseStore((s) => s.description);
   const isFileUploading = useAddExpenseStore((s) => s.isFileUploading);
+  const amtStr = useAddExpenseStore((s) => s.amountStr);
 
   const { t, ready } = useTranslation();
 
@@ -142,12 +143,18 @@ export const AddExpensePage: React.FC<{
     },
   };
 
-  const { setCurrency, setCategory, setDescription, setAmount, resetState } = useAddExpenseStore(
-    (s) => s.actions,
-  );
+  const {
+    setCurrency,
+    setCategory,
+    setDescription,
+    setAmount,
+    setAmountStr,
+    resetState,
+    setSplitScreenOpen,
+  } = useAddExpenseStore((s) => s.actions);
 
-  const addExpenseMutation = api.user.addExpense.useMutation();
-  const addGroupExpenseMutation = api.group.addExpense.useMutation();
+  const addExpenseMutation = api.user.addOrEditExpense.useMutation();
+  const addGroupExpenseMutation = api.group.addOrEditExpense.useMutation();
   const updateProfile = api.user.updateUserDetail.useMutation();
 
   const router = useRouter();
@@ -166,6 +173,7 @@ export const AddExpensePage: React.FC<{
     date,
     transactionId,
     participants,
+    expenseId
   }: {
     name: string;
     currency: string;
@@ -173,11 +181,13 @@ export const AddExpensePage: React.FC<{
     paidBy: number;
     date?: Date;
     transactionId?: string;
+    expenseId?: string
     participants: Participant[];
   }) => {
     const { splitType, fileKey } = useAddExpenseStore.getState();
 
     return {
+      expenseId,
       name,
       currency,
       amount,
@@ -248,8 +258,14 @@ export const AddExpensePage: React.FC<{
   }
 
   function addExpense() {
-    const { group, paidBy } = useAddExpenseStore.getState();
+    const { group, paidBy, splitType, fileKey, canSplitScreenClosed } =
+      useAddExpenseStore.getState();
     if (!paidBy) {
+      return;
+    }
+
+    if (!canSplitScreenClosed) {
+      setSplitScreenOpen(true);
       return;
     }
 
@@ -266,6 +282,16 @@ export const AddExpensePage: React.FC<{
             participants: participants,
           }),
           groupId: group.id,
+          splitType,
+          participants: participants.map((p) => ({
+            userId: p.id,
+            amount: p.amount ?? 0,
+          })),
+          paidBy: paidBy.id,
+          category,
+          fileKey,
+          expenseDate: date,
+          expenseId,
         },
         {
           onSuccess: (d) => {
@@ -281,6 +307,7 @@ export const AddExpensePage: React.FC<{
     } else {
       addExpenseMutation.mutate(
         returnMutateObject({
+          expenseId,
           name: description,
           currency,
           amount,
@@ -291,7 +318,6 @@ export const AddExpensePage: React.FC<{
         }),
         {
           onSuccess: (d) => {
-            resetState();
             if (participants[1] && d) {
               router
                 .push(`/balances/${participants[1]?.id}`)
@@ -352,7 +378,7 @@ export const AddExpensePage: React.FC<{
             {t('save')}
           </Button>{' '}
         </div>
-        <UserInput />
+        <UserInput isEditing={!!expenseId} />
         {showFriends || (participants.length === 1 && !group) ? (
           <SelectUserOrGroup enableSendingInvites={enableSendingInvites} />
         ) : (

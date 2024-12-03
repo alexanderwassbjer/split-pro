@@ -21,6 +21,7 @@
   "close": "Close",
   "submit": "Submit",
   "cancel": "Cancel",
+  "edited_by": "Edited by",
   "save": "Save",
   "copied": "Copied",
   "subscribe": "Subscribe",
@@ -147,6 +148,10 @@
   "group_info": "Group info",
 
   "members": "Members",
+  "add_more_friends": "Add more friends",
+  "cant_change_group_when_editing": "Cannot change group while editing",
+  "please_delete_to_remove_group": "Press delete to remove group",
+  "search_friend_group_email": "Search friends, groups or add email",
   "addmembers": "Add members",
   "addmember_placeholder": "Enter name or email",
   "addmember_valid_mail": "Enter valid email",

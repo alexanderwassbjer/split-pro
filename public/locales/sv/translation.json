@@ -21,6 +21,7 @@
   "close": "Stäng",
   "submit": "Skicka",
   "cancel": "Avbryt",
+  "edited_by": "Ändrad av",
   "save": "Spara",
   "copied": "Kopierat",
   "subscribe": "Prenumerera",
@@ -148,6 +149,10 @@
   "group_info": "Gruppinfo",
 
   "members": "Medlemmar",
+  "add_more_friends": "Lägg till vänner",
+  "cant_change_group_when_editing": "Kan inte byta grupp medan du redigerar",
+  "please_delete_to_remove_group": "Tryck på ta bort för att radera gruppen",
+  "search_friend_group_email": "Sök vänner, grupper eller lägg till e-post",
   "addmembers": "Lägg till medlemmar",
   "addmember_placeholder": "Ange namn eller e-post",
   "addmember_valid_mail": "Ange giltig e-post",
