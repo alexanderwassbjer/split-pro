@@ -28,6 +28,7 @@ const AddPage: NextPageWithUser<{
     setPaidBy,
     setAmountStr,
     setSplitType,
+    setExpenseDate,
   } = useAddExpenseStore((s) => s.actions);
   const currentUser = useAddExpenseStore((s) => s.currentUser);
 
@@ -129,6 +130,7 @@ const AddPage: NextPageWithUser<{
       setAmount(toFixedNumber(expenseQuery.data.amount));
       setSplitType(expenseQuery.data.splitType);
       useAddExpenseStore.setState({ showFriends: false });
+      setExpenseDate(expenseQuery.data.expenseDate);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_expenseId, expenseQuery.data]);

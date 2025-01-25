@@ -35,7 +35,6 @@ export const AddOrEditExpensePage: React.FC<{
   enableSendingInvites: boolean;
   expenseId?: string;
 }> = ({ isStorageConfigured, enableSendingInvites, expenseId }) => {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [open, setOpen] = React.useState(false);
   const [transactionId, setTransactionId] = React.useState('');
   const [multipleArray, setMultipleArray] = React.useState<TransactionAddInputModel[]>([]);
@@ -49,6 +48,7 @@ export const AddOrEditExpensePage: React.FC<{
   const description = useAddExpenseStore((s) => s.description);
   const isFileUploading = useAddExpenseStore((s) => s.isFileUploading);
   const amtStr = useAddExpenseStore((s) => s.amountStr);
+  const expenseDate = useAddExpenseStore((s) => s.expenseDate);
 
   const { t, ready } = useTranslation();
 
@@ -151,6 +151,7 @@ export const AddOrEditExpensePage: React.FC<{
     setAmountStr,
     resetState,
     setSplitScreenOpen,
+    setExpenseDate,
   } = useAddExpenseStore((s) => s.actions);
 
   const addExpenseMutation = api.user.addOrEditExpense.useMutation();
@@ -170,7 +171,7 @@ export const AddOrEditExpensePage: React.FC<{
     currency,
     amount,
     paidBy,
-    date,
+    expenseDate,
     transactionId,
     participants,
     expenseId
@@ -179,7 +180,7 @@ export const AddOrEditExpensePage: React.FC<{
     currency: string;
     amount: number;
     paidBy: number;
-    date?: Date;
+    expenseDate?: Date;
     transactionId?: string;
     expenseId?: string
     participants: Participant[];
@@ -199,7 +200,7 @@ export const AddOrEditExpensePage: React.FC<{
       paidBy,
       category,
       fileKey,
-      expenseDate: date,
+      expenseDate,
       transactionId: transactionId,
     };
   };
@@ -228,7 +229,7 @@ export const AddOrEditExpensePage: React.FC<{
               currency: tempItem.currency,
               amount: _amt,
               paidBy: paidBy.id,
-              date: tempItem.date,
+              expenseDate: tempItem.date,
               transactionId: tempItem.transactionId,
               participants: tempParticipants,
             }),
@@ -241,7 +242,7 @@ export const AddOrEditExpensePage: React.FC<{
               currency: tempItem.currency,
               amount: _amt,
               paidBy: paidBy.id,
-              date: tempItem.date,
+              expenseDate: tempItem.date,
               transactionId: tempItem.transactionId,
               participants: tempParticipants,
             }),
@@ -277,7 +278,7 @@ export const AddOrEditExpensePage: React.FC<{
             currency,
             amount,
             paidBy: paidBy.id,
-            date: date,
+            expenseDate,
             transactionId: transactionId,
             participants: participants,
           }),
@@ -290,7 +291,7 @@ export const AddOrEditExpensePage: React.FC<{
           paidBy: paidBy.id,
           category,
           fileKey,
-          expenseDate: date,
+          expenseDate,
           expenseId,
         },
         {
@@ -306,16 +307,19 @@ export const AddOrEditExpensePage: React.FC<{
       );
     } else {
       addExpenseMutation.mutate(
-        returnMutateObject({
-          expenseId,
+        {
+        ...returnMutateObject({
           name: description,
           currency,
           amount,
           paidBy: paidBy.id,
-          date: date,
+          expenseDate,
           transactionId: transactionId,
           participants: participants,
         }),
+      expenseId,
+      category,
+      fileKey,},
         {
           onSuccess: (d) => {
             if (participants[1] && d) {
@@ -333,7 +337,7 @@ export const AddOrEditExpensePage: React.FC<{
   const CategoryIcon = CategoryIcons[category] ?? Banknote;
 
   const addViaGoCardless = (obj: TransactionAddInputModel) => {
-    setDate(obj.date);
+    setExpenseDate(obj.date);
     setDescription(obj.description);
     setCurrency(obj.currency);
     onUpdateAmount(obj.amount);
@@ -344,7 +348,7 @@ export const AddOrEditExpensePage: React.FC<{
     setAmount(0);
     setDescription('');
     setAmountStr('');
-    setDate(new Date());
+    setExpenseDate(new Date());
   };
 
   return (
@@ -512,15 +516,15 @@ export const AddOrEditExpensePage: React.FC<{
                           variant="ghost"
                           className={cn(
                             ' justify-start px-0 text-left font-normal',
-                            !date && 'text-muted-foreground',
+                            !expenseDate && 'text-muted-foreground',
                           )}
                         >
                           <CalendarIcon className="mr-2 h-6 w-6 text-cyan-500" />
-                          {date ? (
-                            format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? (
+                          {expenseDate ? (
+                            format(expenseDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? (
                               t('today')
                             ) : (
-                              format(date, 'MMM dd')
+                              format(expenseDate, 'MMM dd')
                             )
                           ) : (
                             <span>{t('expense_date')}</span>
@@ -528,7 +532,7 @@ export const AddOrEditExpensePage: React.FC<{
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                        <Calendar mode="single" selected={expenseDate} onSelect={setExpenseDate} initialFocus />
                       </PopoverContent>
                     </Popover>
                   </div>
