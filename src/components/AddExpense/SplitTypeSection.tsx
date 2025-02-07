@@ -16,8 +16,9 @@ export const SplitTypeSection: React.FC = () => {
   const currentUser = useAddExpenseStore((s) => s.currentUser);
   const canSplitScreenClosed = useAddExpenseStore((s) => s.canSplitScreenClosed);
   const splitType = useAddExpenseStore((s) => s.splitType);
+  const splitScreenOpen = useAddExpenseStore((s) => s.splitScreenOpen);
 
-  const { setPaidBy } = useAddExpenseStore((s) => s.actions);
+  const { setPaidBy, setSplitScreenOpen } = useAddExpenseStore((s) => s.actions);
 
   const { t, ready } = useTranslation();
 
@@ -74,6 +75,8 @@ export const SplitTypeSection: React.FC = () => {
         dismissible={false}
         actionTitle={t('save')}
         actionDisabled={!canSplitScreenClosed}
+        open={splitScreenOpen}
+        onOpenChange={(open) => setSplitScreenOpen(open)}
       >
         <SplitExpenseForm />
       </AppDrawer>

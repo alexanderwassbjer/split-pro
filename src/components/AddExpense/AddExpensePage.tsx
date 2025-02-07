@@ -30,13 +30,12 @@ export type TransactionAddInputModel = {
   transactionId?: string;
 };
 
-export const AddExpensePage: React.FC<{
+export const AddOrEditExpensePage: React.FC<{
   isStorageConfigured: boolean;
   enableSendingInvites: boolean;
-}> = ({ isStorageConfigured, enableSendingInvites }) => {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  expenseId?: string;
+}> = ({ isStorageConfigured, enableSendingInvites, expenseId }) => {
   const [open, setOpen] = React.useState(false);
-  const [amtStr, setAmountStr] = React.useState('');
   const [transactionId, setTransactionId] = React.useState('');
   const [multipleArray, setMultipleArray] = React.useState<TransactionAddInputModel[]>([]);
 
@@ -48,6 +47,8 @@ export const AddExpensePage: React.FC<{
   const category = useAddExpenseStore((s) => s.category);
   const description = useAddExpenseStore((s) => s.description);
   const isFileUploading = useAddExpenseStore((s) => s.isFileUploading);
+  const amtStr = useAddExpenseStore((s) => s.amountStr);
+  const expenseDate = useAddExpenseStore((s) => s.expenseDate);
 
   const { t, ready } = useTranslation();
 
@@ -142,12 +143,19 @@ export const AddExpensePage: React.FC<{
     },
   };
 
-  const { setCurrency, setCategory, setDescription, setAmount, resetState } = useAddExpenseStore(
-    (s) => s.actions,
-  );
+  const {
+    setCurrency,
+    setCategory,
+    setDescription,
+    setAmount,
+    setAmountStr,
+    resetState,
+    setSplitScreenOpen,
+    setExpenseDate,
+  } = useAddExpenseStore((s) => s.actions);
 
-  const addExpenseMutation = api.user.addExpense.useMutation();
-  const addGroupExpenseMutation = api.group.addExpense.useMutation();
+  const addExpenseMutation = api.user.addOrEditExpense.useMutation();
+  const addGroupExpenseMutation = api.group.addOrEditExpense.useMutation();
   const updateProfile = api.user.updateUserDetail.useMutation();
 
   const router = useRouter();
@@ -163,21 +171,24 @@ export const AddExpensePage: React.FC<{
     currency,
     amount,
     paidBy,
-    date,
+    expenseDate,
     transactionId,
     participants,
+    expenseId
   }: {
     name: string;
     currency: string;
     amount: number;
     paidBy: number;
-    date?: Date;
+    expenseDate?: Date;
     transactionId?: string;
+    expenseId?: string
     participants: Participant[];
   }) => {
     const { splitType, fileKey } = useAddExpenseStore.getState();
 
     return {
+      expenseId,
       name,
       currency,
       amount,
@@ -189,7 +200,7 @@ export const AddExpensePage: React.FC<{
       paidBy,
       category,
       fileKey,
-      expenseDate: date,
+      expenseDate,
       transactionId: transactionId,
     };
   };
@@ -218,7 +229,7 @@ export const AddExpensePage: React.FC<{
               currency: tempItem.currency,
               amount: _amt,
               paidBy: paidBy.id,
-              date: tempItem.date,
+              expenseDate: tempItem.date,
               transactionId: tempItem.transactionId,
               participants: tempParticipants,
             }),
@@ -231,7 +242,7 @@ export const AddExpensePage: React.FC<{
               currency: tempItem.currency,
               amount: _amt,
               paidBy: paidBy.id,
-              date: tempItem.date,
+              expenseDate: tempItem.date,
               transactionId: tempItem.transactionId,
               participants: tempParticipants,
             }),
@@ -248,8 +259,14 @@ export const AddExpensePage: React.FC<{
   }
 
   function addExpense() {
-    const { group, paidBy } = useAddExpenseStore.getState();
+    const { group, paidBy, splitType, fileKey, canSplitScreenClosed } =
+      useAddExpenseStore.getState();
     if (!paidBy) {
+      return;
+    }
+
+    if (!canSplitScreenClosed) {
+      setSplitScreenOpen(true);
       return;
     }
 
@@ -261,11 +278,21 @@ export const AddExpensePage: React.FC<{
             currency,
             amount,
             paidBy: paidBy.id,
-            date: date,
+            expenseDate,
             transactionId: transactionId,
             participants: participants,
           }),
           groupId: group.id,
+          splitType,
+          participants: participants.map((p) => ({
+            userId: p.id,
+            amount: p.amount ?? 0,
+          })),
+          paidBy: paidBy.id,
+          category,
+          fileKey,
+          expenseDate,
+          expenseId,
         },
         {
           onSuccess: (d) => {
@@ -280,18 +307,21 @@ export const AddExpensePage: React.FC<{
       );
     } else {
       addExpenseMutation.mutate(
-        returnMutateObject({
+        {
+        ...returnMutateObject({
           name: description,
           currency,
           amount,
           paidBy: paidBy.id,
-          date: date,
+          expenseDate,
           transactionId: transactionId,
           participants: participants,
         }),
+      expenseId,
+      category,
+      fileKey,},
         {
           onSuccess: (d) => {
-            resetState();
             if (participants[1] && d) {
               router
                 .push(`/balances/${participants[1]?.id}`)
@@ -307,7 +337,7 @@ export const AddExpensePage: React.FC<{
   const CategoryIcon = CategoryIcons[category] ?? Banknote;
 
   const addViaGoCardless = (obj: TransactionAddInputModel) => {
-    setDate(obj.date);
+    setExpenseDate(obj.date);
     setDescription(obj.description);
     setCurrency(obj.currency);
     onUpdateAmount(obj.amount);
@@ -318,7 +348,7 @@ export const AddExpensePage: React.FC<{
     setAmount(0);
     setDescription('');
     setAmountStr('');
-    setDate(new Date());
+    setExpenseDate(new Date());
   };
 
   return (
@@ -352,7 +382,7 @@ export const AddExpensePage: React.FC<{
             {t('save')}
           </Button>{' '}
         </div>
-        <UserInput />
+        <UserInput isEditing={!!expenseId} />
         {showFriends || (participants.length === 1 && !group) ? (
           <SelectUserOrGroup enableSendingInvites={enableSendingInvites} />
         ) : (
@@ -486,15 +516,15 @@ export const AddExpensePage: React.FC<{
                           variant="ghost"
                           className={cn(
                             ' justify-start px-0 text-left font-normal',
-                            !date && 'text-muted-foreground',
+                            !expenseDate && 'text-muted-foreground',
                           )}
                         >
                           <CalendarIcon className="mr-2 h-6 w-6 text-cyan-500" />
-                          {date ? (
-                            format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? (
+                          {expenseDate ? (
+                            format(expenseDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? (
                               t('today')
                             ) : (
-                              format(date, 'MMM dd')
+                              format(expenseDate, 'MMM dd')
                             )
                           ) : (
                             <span>{t('expense_date')}</span>
@@ -502,7 +532,7 @@ export const AddExpensePage: React.FC<{
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                        <Calendar mode="single" selected={expenseDate} onSelect={setExpenseDate} initialFocus />
                       </PopoverContent>
                     </Popover>
                   </div>

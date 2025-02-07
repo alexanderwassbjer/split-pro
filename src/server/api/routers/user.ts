@@ -5,6 +5,7 @@ import { db } from '~/server/db';
 import {
   addUserExpense,
   deleteExpense,
+  editExpense,
   getCompleteFriendsDetails,
   getCompleteGroupDetails,
   importGroupFromSplitwise,
@@ -137,7 +138,7 @@ export const userRouter = createTRPCRouter({
       return user;
     }),
 
-  addExpense: protectedProcedure
+  addOrEditExpense: protectedProcedure
     .input(
       z.object({
         paidBy: z.number(),
@@ -157,23 +158,59 @@ export const userRouter = createTRPCRouter({
         participants: z.array(z.object({ userId: z.number(), amount: z.number() })),
         fileKey: z.string().optional(),
         expenseDate: z.date().optional(),
+        expenseId: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      if (input.expenseId) {
+        const expenseParticipant = await db.expenseParticipant.findUnique({
+          where: {
+            expenseId_userId: {
+              expenseId: input.expenseId,
+              userId: ctx.session.user.id,
+            },
+          },
+        });
+
+        console.log('expenseParticipant', expenseParticipant);
+
+        if (!expenseParticipant) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'You are not the participant of the expense',
+          });
+        }
+      }
+
       try {
-        const expense = await addUserExpense(
-          input.paidBy,
-          input.name,
-          input.category,
-          input.amount,
-          input.splitType,
-          input.currency,
-          input.participants,
-          ctx.session.user.id,
-          input.expenseDate ?? new Date(),
-          input.fileKey,
-          input.transactionId,
-        );
+        const expense = input.expenseId
+          ? await editExpense(
+              input.expenseId,
+              input.paidBy,
+              input.name,
+              input.category,
+              input.amount,
+              input.splitType,
+              input.currency,
+              input.participants,
+              ctx.session.user.id,
+              input.expenseDate ?? new Date(),
+              input.fileKey,
+              input.transactionId,
+            )
+          : await addUserExpense(
+              input.paidBy,
+              input.name,
+              input.category,
+              input.amount,
+              input.splitType,
+              input.currency,
+              input.participants,
+              ctx.session.user.id,
+              input.expenseDate ?? new Date(),
+              input.fileKey,
+              input.transactionId,
+            );
 
         return expense;
       } catch (error) {
@@ -233,23 +270,22 @@ export const userRouter = createTRPCRouter({
       return expenses;
     }),
 
-    getOwnExpenses: protectedProcedure
-    .query(async ({ ctx }) => {
-      const expenses = await db.expense.findMany({
-        where: {
-          paidBy: ctx.session.user.id,
-          deletedBy: null,
-        },
-        orderBy: {
-          expenseDate: 'desc',
-        },
-        include: {
-          group: true
-        },
-      });
+  getOwnExpenses: protectedProcedure.query(async ({ ctx }) => {
+    const expenses = await db.expense.findMany({
+      where: {
+        paidBy: ctx.session.user.id,
+        deletedBy: null,
+      },
+      orderBy: {
+        expenseDate: 'desc',
+      },
+      include: {
+        group: true,
+      },
+    });
 
-      return expenses;
-    }),
+    return expenses;
+  }),
 
   getBalancesWithFriend: protectedProcedure
     .input(z.object({ friendId: z.number() }))
@@ -284,6 +320,8 @@ export const userRouter = createTRPCRouter({
           addedByUser: true,
           paidByUser: true,
           deletedByUser: true,
+          updatedByUser: true,
+          group: true,
         },
       });
 
@@ -291,7 +329,14 @@ export const userRouter = createTRPCRouter({
     }),
 
   updateUserDetail: protectedProcedure
-    .input(z.object({ name: z.string().optional(), currency: z.string().optional(), gocardlessId: z.string().optional(), gocardlessBankId: z.string().optional() }))
+    .input(
+      z.object({
+        name: z.string().optional(),
+        currency: z.string().optional(),
+        gocardlessId: z.string().optional(),
+        gocardlessBankId: z.string().optional(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const user = await db.user.update({
         where: {
@@ -453,7 +498,6 @@ export const userRouter = createTRPCRouter({
           },
         },
       });
-
       if (friendBalances.length > 0) {
         throw new TRPCError({
           code: 'BAD_REQUEST',

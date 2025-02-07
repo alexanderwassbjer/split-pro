@@ -6,13 +6,14 @@ import { type User } from '@prisma/client';
 import { api } from '~/utils/api';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ChevronLeftIcon } from 'lucide-react';
+import { ChevronLeftIcon, PencilIcon } from 'lucide-react';
 import ExpenseDetails from '~/components/Expense/ExpensePage';
 import { DeleteExpense } from '~/components/Expense/DeleteExpense';
 import { type NextPageWithUser } from '~/types';
 import { env } from 'process';
 import '../../i18n/config';
 import { useTranslation } from 'react-i18next';
+import { Button } from '~/components/ui/button';
 
 const ExpensesPage: NextPageWithUser<{ storagePublicUrl?: string }> = ({
   user,
@@ -43,7 +44,20 @@ const ExpensesPage: NextPageWithUser<{ storagePublicUrl?: string }> = ({
             <p className="text-[16px] font-normal">{t('expense_details')}</p>
           </div>
         }
-        actions={!expenseQuery.data?.deletedBy ? <DeleteExpense expenseId={expenseId} /> : null}
+        actions={
+          <div className="flex items-center gap-1">
+            {!expenseQuery.data?.deletedBy ? (
+              <div className="flex items-center gap-1">
+                <DeleteExpense expenseId={expenseId} />
+                <Link href={`/add?expenseId=${expenseId}`}>
+                  <Button variant="ghost">
+                    <PencilIcon className="mr-1 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            ) : null}
+          </div>
+        }
       >
         {expenseQuery.data ? (
           <ExpenseDetails

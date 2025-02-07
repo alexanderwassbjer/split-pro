@@ -7,7 +7,9 @@ import Router from 'next/router';
 import '../../i18n/config';
 import { useTranslation } from 'react-i18next';
 
-export const UserInput: React.FC = () => {
+export const UserInput: React.FC<{
+  isEditing?: boolean;
+}> = ({ isEditing }) => {
   const {
     setNameOrEmail,
     removeLastParticipant,
@@ -97,17 +99,20 @@ export const UserInput: React.FC = () => {
       <input
         type="email"
         placeholder={
-          group
-            ? t('delete_group')
-            : participants.length > 1
-              ? t('addmembers')
-              : t('add_action')
+          isEditing && !!group
+            ? t("cant_change_group_when_editing")
+            : group
+              ? t("please_delete_to_remove_group")
+              : participants.length > 1
+                ? t('add_more_friends')
+                : t("search_friend_group_email")
         }
         value={nameOrEmail}
         onChange={(e) => setNameOrEmail(e.target.value)}
         onKeyDown={handleKeyDown}
         className="min-w-[100px] flex-grow bg-transparent outline-none placeholder:text-sm focus:ring-0"
         autoFocus
+        disabled={isEditing && !!group}
       />
     </div>
   );
