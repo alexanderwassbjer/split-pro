@@ -21,8 +21,8 @@ declare module 'next-auth' {
     user: DefaultSession['user'] & {
       id: number;
       currency: string;
-      gocardlessId?: string
-      gocardlessBankId?: string,
+      gocardlessId?: string;
+      gocardlessBankId?: string;
       // ...other properties
       // role: UserRole;
     };
@@ -31,8 +31,8 @@ declare module 'next-auth' {
   interface User {
     id: number;
     currency: string;
-    gocardlessId?: string
-    gocardlessBankId?: string,
+    gocardlessId?: string;
+    gocardlessBankId?: string;
   }
 }
 
@@ -157,11 +157,11 @@ function getProviders() {
         clientId: env.AUTHENTIK_ID,
         clientSecret: env.AUTHENTIK_SECRET,
         issuer: env.AUTHENTIK_ISSUER,
-		allowDangerousEmailAccountLinking: true,
-      })
+        allowDangerousEmailAccountLinking: true,
+      }),
     );
   }
-  
+
   return providersList;
 }
 

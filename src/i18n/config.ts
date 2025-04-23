@@ -1,11 +1,11 @@
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import HttpApi from "i18next-http-backend";
+import HttpApi from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
 
 export const supportedLngs = {
-  en: "English",
-  sv: "Swedish",
+  en: 'English',
+  sv: 'Swedish',
 };
 
 i18next
@@ -14,7 +14,7 @@ i18next
   .use(initReactI18next)
   .init({
     supportedLngs: Object.keys(supportedLngs),
-    fallbackLng: 'en',
+    fallbackLng: 'sv',
     detection: {
       order: ['querystring', 'cookie', 'localStorage', 'navigator', 'htmlTag'],
       caches: ['cookie'],
@@ -24,4 +24,4 @@ i18next
     },
   });
 
-  export default i18next;
+export default i18next;

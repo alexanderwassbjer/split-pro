@@ -26,7 +26,7 @@
   "copied": "Kopierat",
   "subscribe": "Prenumerera",
   "back": "Tillbaka",
-  "delete": "radera",
+  "delete": "Radera",
   "invite": "Bjud in",
   "leave": "Lämna",
   "today": "Idag",
@@ -197,5 +197,6 @@
   "no_languages_found": "Inga språk hittades",
   "verified_transaction": "Verifierad transaktion",
   "theme": "Tema",
-  "select_theme": "Välj tema"
+  "select_theme": "Välj tema",
+  "clear": "Rensa"
 }

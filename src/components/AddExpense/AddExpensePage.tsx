@@ -174,7 +174,7 @@ export const AddOrEditExpensePage: React.FC<{
     expenseDate,
     transactionId,
     participants,
-    expenseId
+    expenseId,
   }: {
     name: string;
     currency: string;
@@ -182,7 +182,7 @@ export const AddOrEditExpensePage: React.FC<{
     paidBy: number;
     expenseDate?: Date;
     transactionId?: string;
-    expenseId?: string
+    expenseId?: string;
     participants: Participant[];
   }) => {
     const { splitType, fileKey } = useAddExpenseStore.getState();
@@ -211,7 +211,16 @@ export const AddOrEditExpensePage: React.FC<{
       return;
     }
 
-    for (const tempItem of multipleArray) {
+    const seen = new Set();
+    const deduplicated = multipleArray.filter((item) => {
+      if (seen.has(item.transactionId)) {
+        return false;
+      }
+      seen.add(item.transactionId);
+      return true;
+    });
+
+    for (const tempItem of deduplicated) {
       if (tempItem) {
         const _amt = Number(tempItem.amount.replace(',', '.')) ?? 0;
 
@@ -308,18 +317,19 @@ export const AddOrEditExpensePage: React.FC<{
     } else {
       addExpenseMutation.mutate(
         {
-        ...returnMutateObject({
-          name: description,
-          currency,
-          amount,
-          paidBy: paidBy.id,
-          expenseDate,
-          transactionId: transactionId,
-          participants: participants,
-        }),
-      expenseId,
-      category,
-      fileKey,},
+          ...returnMutateObject({
+            name: description,
+            currency,
+            amount,
+            paidBy: paidBy.id,
+            expenseDate,
+            transactionId: transactionId,
+            participants: participants,
+          }),
+          expenseId,
+          category,
+          fileKey,
+        },
         {
           onSuccess: (d) => {
             if (participants[1] && d) {
@@ -521,7 +531,8 @@ export const AddOrEditExpensePage: React.FC<{
                         >
                           <CalendarIcon className="mr-2 h-6 w-6 text-cyan-500" />
                           {expenseDate ? (
-                            format(expenseDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? (
+                            format(expenseDate, 'yyyy-MM-dd') ===
+                            format(new Date(), 'yyyy-MM-dd') ? (
                               t('today')
                             ) : (
                               format(expenseDate, 'MMM dd')
@@ -532,7 +543,12 @@ export const AddOrEditExpensePage: React.FC<{
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar mode="single" selected={expenseDate} onSelect={setExpenseDate} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={expenseDate}
+                          onSelect={setExpenseDate}
+                          initialFocus
+                        />
                       </PopoverContent>
                     </Popover>
                   </div>
@@ -562,20 +578,22 @@ export const AddOrEditExpensePage: React.FC<{
                 </div>
                 <div className="flex items-center justify-end gap-4">
                   <Button variant="ghost" className=" px-0 text-primary" onClick={clearFields}>
-                    Clear
+                    {t('clear')}
                   </Button>
                 </div>
               </div>
             )}
-            <GoCardlessTransactions
-              add={addViaGoCardless}
-              addMultipleExpenses={addMultipleExpenses}
-              multipleArray={multipleArray}
-              setMultipleArray={(a: TransactionAddInputModel[]) => {
-                clearFields();
-                setMultipleArray(a);
-              }}
-            />
+            {group && (
+              <GoCardlessTransactions
+                add={addViaGoCardless}
+                addMultipleExpenses={addMultipleExpenses}
+                multipleArray={multipleArray}
+                setMultipleArray={(a: TransactionAddInputModel[]) => {
+                  clearFields();
+                  setMultipleArray(a);
+                }}
+              />
+            )}
             <div className=" flex w-full justify-center">
               <Link
                 href="https://github.com/sponsors/KMKoushik"

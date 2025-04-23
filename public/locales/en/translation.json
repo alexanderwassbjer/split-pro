@@ -26,7 +26,7 @@
   "copied": "Copied",
   "subscribe": "Subscribe",
   "back": "Back",
-  "delete": "delete",
+  "delete": "Delete",
   "invite": "Invite",
   "leave": "Leave",
   "today": "Today",
@@ -196,5 +196,6 @@
   "no_languages_found": "No language found",
   "verified_transaction": "Verified transaction",
   "theme": "Theme",
-  "select_theme": "Select theme"
+  "select_theme": "Select theme",
+  "clear": "Clear"
 }
